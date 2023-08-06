@@ -22,7 +22,7 @@ class Product(models.Model):
     inventory = models.IntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
-    promotions = models.ManyToManyField(Promotion, blank=True, related_name="products")
+    promotions = models.ManyToManyField(Promotion, blank=True)
 
 
 class Customer(models.Model):
@@ -44,6 +44,9 @@ class Customer(models.Model):
     membership = models.CharField(
         choices=MEMBERSHIP_CHOICES, max_length=1, default=MEMBERSHIP_BROZNE
     )
+
+    class Meta:
+        indexes = [models.Index(fields=["first_name", "last_name"])]
 
 
 class Order(models.Model):
