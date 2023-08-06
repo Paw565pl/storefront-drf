@@ -1,0 +1,5 @@
+truncate table store_collection
+truncate table store_product
+truncate table store_customer
+truncate table store_order
+truncate table store_orderitem
