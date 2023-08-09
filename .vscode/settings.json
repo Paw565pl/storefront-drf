@@ -2,12 +2,10 @@
   "sqltools.connections": [
     {
       "previewLimit": 50,
-      "server": "0.0.0.0",
-      "port": 5432,
+      "server": "localhost",
       "driver": "PostgreSQL",
-      "name": "storefront-db",
-      "database": "storefront",
-      "username": "postgres"
+      "connectString": "postgresql://postgres:mysecretpassword@0.0.0.0:5432/storefront",
+      "name": "storefront_db"
     }
   ]
 }
