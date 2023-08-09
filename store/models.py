@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 
 # Create your models here.
@@ -7,6 +8,12 @@ class Collection(models.Model):
     featured_product = models.ForeignKey(
         "Product", on_delete=models.SET_NULL, null=True, related_name="+"
     )
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ["title"]
 
 
 class Promotion(models.Model):
@@ -17,12 +24,20 @@ class Promotion(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, default="-")
-    description = models.TextField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
+    unit_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+    )
     inventory = models.IntegerField(default=0)
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
-    promotions = models.ManyToManyField(Promotion, blank=True)
+    promotions = models.ManyToManyField(Promotion, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ["title"]
 
 
 class Customer(models.Model):
@@ -45,8 +60,12 @@ class Customer(models.Model):
         choices=MEMBERSHIP_CHOICES, max_length=1, default=MEMBERSHIP_BROZNE
     )
 
+    def __str__(self) -> str:
+        return self.first_name + " " + self.last_name
+
     class Meta:
         indexes = [models.Index(fields=["first_name", "last_name"])]
+        ordering = ["first_name", "last_name"]
 
 
 class Order(models.Model):
