@@ -1,27 +1,35 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 from .models import Product, OrderItem, Collection
 from .serializers import ProductSerializer, CollectionSerializer
 
 
 # Create your views here.
-class ProductList(APIView):
-    def get(self, _):
-        queryset = (
-            Product.objects.select_related("collection")
-            .prefetch_related("promotions")
-            .all()
-        )
-        serializer = ProductSerializer(queryset, many=True)
-        return Response(serializer.data)
+class ProductList(ListCreateAPIView):
+    queryset = (
+        Product.objects.select_related("collection")
+        .prefetch_related("promotions")
+        .all()
+    )
+    serializer_class = ProductSerializer
 
-    def post(self, request):
-        serializer = ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def get(self, _):
+    #     queryset = (
+    #         Product.objects.select_related("collection")
+    #         .prefetch_related("promotions")
+    #         .all()
+    #     )
+    #     serializer = ProductSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+
+    # def post(self, request):
+    #     serializer = ProductSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ProductDetail(APIView):
@@ -57,17 +65,20 @@ class ProductDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CollectionList(APIView):
-    def get(self, _):
-        queryset = Collection.objects.prefetch_related("product_set").all()
-        serializer = CollectionSerializer(queryset, many=True)
-        return Response(serializer.data)
+class CollectionList(ListCreateAPIView):
+    queryset = Collection.objects.prefetch_related("product_set").all()
+    serializer_class = CollectionSerializer
 
-    def post(self, request):
-        serializer = CollectionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def get(self, _):
+    #     queryset = Collection.objects.prefetch_related("product_set").all()
+    #     serializer = CollectionSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+
+    # def post(self, request):
+    #     serializer = CollectionSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CollectionDetail(APIView):
