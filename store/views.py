@@ -9,11 +9,7 @@ from .serializers import ProductSerializer, CollectionSerializer
 
 # Create your views here.
 class ProductList(ListCreateAPIView):
-    queryset = (
-        Product.objects.select_related("collection")
-        .prefetch_related("promotions")
-        .all()
-    )
+    queryset = Product.objects.prefetch_related("promotions").all()
     serializer_class = ProductSerializer
 
     # def get(self, _):
@@ -33,7 +29,7 @@ class ProductList(ListCreateAPIView):
 
 
 class ProductDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related("promotions").all()
     serializer_class = ProductSerializer
 
     def delete(self, _, pk):
@@ -85,7 +81,7 @@ class CollectionList(ListCreateAPIView):
 
 
 class CollectionDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.all()
+    queryset = Collection.objects.prefetch_related("product_set").all()
     serializer_class = CollectionSerializer
 
     def delete(self, _, pk):
