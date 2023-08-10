@@ -4016,3 +4016,15 @@ values  (1, 3, 81.61, 357, 751),
         (998, 4, 80.82, 725, 25),
         (999, 5, 99.80, 573, 834),
         (1000, 4, 93.80, 380, 188);                  
+
+-- sync ids
+
+SELECT setval('store_collection_id_seq', (SELECT MAX(id) FROM store_collection));
+SELECT setval('store_promotion_id_seq', (SELECT MAX(id) FROM store_promotion));
+SELECT setval('store_product_id_seq', (SELECT MAX(id) FROM store_product));
+SELECT setval('store_customer_id_seq', (SELECT MAX(id) FROM store_customer));
+SELECT setval('store_order_id_seq', (SELECT MAX(id) FROM store_order));
+SELECT setval('store_address_id_seq', (SELECT MAX(id) FROM store_address));
+SELECT setval('store_orderitem_id_seq', (SELECT MAX(id) FROM store_orderitem));
+SELECT setval('store_cart_id_seq', (SELECT MAX(id) FROM store_cart));
+SELECT setval('store_cartitem_id_seq', (SELECT MAX(id) FROM store_cartitem));
