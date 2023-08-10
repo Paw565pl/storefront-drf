@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Product, OrderItem, Collection
@@ -32,25 +32,9 @@ class ProductList(ListCreateAPIView):
     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class ProductDetail(APIView):
-    def get(self, _, pk):
-        product = get_object_or_404(Product, pk=pk)
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-
-    def post(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        serializer = ProductSerializer(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class ProductDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
     def delete(self, _, pk):
         product = get_object_or_404(Product, pk=pk)
@@ -63,6 +47,25 @@ class ProductDetail(APIView):
             )
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def get(self, _, pk):
+    #     product = get_object_or_404(Product, pk=pk)
+    #     serializer = ProductSerializer(product)
+    #     return Response(serializer.data)
+
+    # def post(self, request, pk):
+    #     product = get_object_or_404(Product, pk=pk)
+    #     serializer = ProductSerializer(product, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # def patch(self, request, pk):
+    #     product = get_object_or_404(Product, pk=pk)
+    #     serializer = ProductSerializer(product, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CollectionList(ListCreateAPIView):
@@ -81,25 +84,9 @@ class CollectionList(ListCreateAPIView):
     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class CollectionDetail(APIView):
-    def get(self, _, pk):
-        collection = get_object_or_404(Collection, pk=pk)
-        serializer = CollectionSerializer(collection)
-        return Response(serializer.data)
-
-    def put(self, request, pk):
-        collection = get_object_or_404(Collection, pk=pk)
-        serializer = CollectionSerializer(collection, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def patch(self, request, pk):
-        collection = get_object_or_404(Collection, pk=pk)
-        serializer = CollectionSerializer(collection, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
 
     def delete(self, _, pk):
         collection = get_object_or_404(Collection, pk=pk)
@@ -112,3 +99,22 @@ class CollectionDetail(APIView):
             )
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def get(self, _, pk):
+    #     collection = get_object_or_404(Collection, pk=pk)
+    #     serializer = CollectionSerializer(collection)
+    #     return Response(serializer.data)
+
+    # def put(self, request, pk):
+    #     collection = get_object_or_404(Collection, pk=pk)
+    #     serializer = CollectionSerializer(collection, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # def patch(self, request, pk):
+    #     collection = get_object_or_404(Collection, pk=pk)
+    #     serializer = CollectionSerializer(collection, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
