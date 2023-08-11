@@ -1,6 +1,7 @@
 from uuid import uuid4
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.conf import settings
 
 
 # Create your models here.
@@ -52,21 +53,18 @@ class Customer(models.Model):
         (MEMBERSHIP_GOLD, "Gold"),
     ]
 
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255, unique=True)
     phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True)
     membership = models.CharField(
         choices=MEMBERSHIP_CHOICES, max_length=1, default=MEMBERSHIP_BROZNE
     )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return self.first_name + " " + self.last_name
+        return self.user.first_name + " " + self.user.last_name
 
     class Meta:
-        indexes = [models.Index(fields=["first_name", "last_name"])]
-        ordering = ["first_name", "last_name"]
+        ordering = ["user__first_name", "user__last_name"]
 
 
 class Order(models.Model):
