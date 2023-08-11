@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from .models import Product, OrderItem, Collection
-from .serializers import ProductSerializer, CollectionSerializer
+from .models import Product, OrderItem, Collection, Review
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
 
 # Create your views here.
@@ -145,3 +145,13 @@ class CollectionViewSet(ModelViewSet):
 #         )
 #     collection.delete()
 #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs["product_pk"]).all()
+
+    def get_serializer_context(self):
+        return {"product_pk": self.kwargs["product_pk"]}
