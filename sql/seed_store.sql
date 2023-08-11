@@ -4026,5 +4026,5 @@ SELECT setval('store_customer_id_seq', (SELECT MAX(id) FROM store_customer));
 SELECT setval('store_order_id_seq', (SELECT MAX(id) FROM store_order));
 SELECT setval('store_address_id_seq', (SELECT MAX(id) FROM store_address));
 SELECT setval('store_orderitem_id_seq', (SELECT MAX(id) FROM store_orderitem));
-SELECT setval('store_cart_id_seq', (SELECT MAX(id) FROM store_cart));
+-- SELECT setval('store_cart_id_seq', (SELECT MAX(id) FROM store_cart));
 SELECT setval('store_cartitem_id_seq', (SELECT MAX(id) FROM store_cartitem));
