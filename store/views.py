@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
@@ -6,6 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from store.filters import ProductFilter
+from store.paginations import StandardSizePagination
 from .models import Product, OrderItem, Collection, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
@@ -19,6 +19,7 @@ class ProductViewSet(ModelViewSet):
     filterset_class = ProductFilter
     search_fields = ["title", "description"]
     ordering_fields = ["unit_price", "last_update"]
+    pagination_class = StandardSizePagination
 
     def destroy(self, request, *args, **kwargs):
         if OrderItem.objects.filter(product_id=kwargs["pk"]).exists():
