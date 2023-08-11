@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+
+from store.filters import ProductFilter
 from .models import Product, OrderItem, Collection, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
@@ -12,12 +15,7 @@ class ProductViewSet(ModelViewSet):
     queryset = Product.objects.prefetch_related("promotions").all()
     serializer_class = ProductSerializer
 
-    def get_queryset(self):
-        queryset = Product.objects.prefetch_related("promotions").all()
-        collection_id = self.request.query_params.get("collection_id")
-        if collection_id:
-            queryset = queryset.filter(collection_id=collection_id)
-        return queryset
+    filterset_class = ProductFilter
 
     def destroy(self, request, *args, **kwargs):
         if OrderItem.objects.filter(product_id=kwargs["pk"]).exists():
