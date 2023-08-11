@@ -7,11 +7,12 @@ from rest_framework.mixins import (
     CreateModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin,
+    UpdateModelMixin,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from store.filters import ProductFilter
 from store.paginations import StandardSizePagination
-from .models import Product, OrderItem, Collection, Review, Cart, CartItem
+from .models import Product, OrderItem, Collection, Review, Cart, CartItem, Customer
 from .serializers import (
     AddCartItemSerializer,
     CartItemSerializer,
@@ -20,6 +21,7 @@ from .serializers import (
     CollectionSerializer,
     ReviewSerializer,
     UpdateCartItemSerializer,
+    CustomerSerializer,
 )
 
 
@@ -205,3 +207,10 @@ class CartItemViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {"cart_pk": self.kwargs["cart_pk"]}
+
+
+class CustomerViewSet(
+    GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
+):
+    queryset = Customer.objects.select_related("user").all()
+    serializer_class = CustomerSerializer

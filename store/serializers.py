@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from decimal import Decimal
-from .models import CartItem, Product, Collection, Review, Cart
+from .models import CartItem, Product, Collection, Review, Cart, Customer
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -123,3 +123,31 @@ class CartSerializer(serializers.ModelSerializer):
         for cart_item in cart.cartitem_set.all():
             total_price += cart_item.product.unit_price * cart_item.quantity
         return round(total_price, 2)
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = [
+            "id",
+            "user_id",
+            "first_name",
+            "last_name",
+            "phone",
+            "birth_date",
+            "membership",
+        ]
+
+    user_id = serializers.IntegerField()
+    first_name = serializers.SerializerMethodField(
+        method_name="get_first_name", read_only=True
+    )
+    last_name = serializers.SerializerMethodField(
+        method_name="get_last_name", read_only=True
+    )
+
+    def get_first_name(self, customer: Customer):
+        return customer.user.first_name
+
+    def get_last_name(self, customer: Customer):
+        return customer.user.last_name
