@@ -150,3 +150,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
 }
+
+DJOSER = {
+    # "SEND_CONFIRMATION_EMAIL": True,
+    "SERIALIZERS": {"user_create": "core.serializers.UserCreateSerializer"},
+}
