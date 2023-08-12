@@ -138,7 +138,7 @@ class CustomerSerializer(serializers.ModelSerializer):
             "membership",
         ]
 
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField(read_only=True)
     first_name = serializers.SerializerMethodField(
         method_name="get_first_name", read_only=True
     )

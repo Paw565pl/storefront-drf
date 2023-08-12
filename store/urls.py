@@ -18,8 +18,18 @@ product_reviews_router.register(
 cart_items_router = routers.NestedDefaultRouter(router, r"carts", lookup="cart")
 cart_items_router.register(r"items", views.CartItemViewSet, basename="cart-items")
 
+# customer_profile_router = routers.NestedDefaultRouter(
+#     router, r"customers", lookup="customer"
+# )
+# customer_profile_router.register(
+#     r"profile",
+#     views.CustomerProfileViewSet,
+#     basename="customer-profile",
+# )
+
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(product_reviews_router.urls)),
     path("", include(cart_items_router.urls)),
+    # path("", include(customer_profile_router.urls)),
 ]

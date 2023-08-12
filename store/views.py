@@ -9,6 +9,12 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAdminUser,
+    DjangoModelPermissions,
+)
 from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from store.filters import ProductFilter
@@ -24,13 +30,14 @@ from .serializers import (
     UpdateCartItemSerializer,
     CustomerSerializer,
 )
+from .permissions import FullDjangoModelPermissions, IsAdminOrReadOnly
 
 
 # Create your views here.
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.prefetch_related("promotions").all()
     serializer_class = ProductSerializer
-
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
     search_fields = ["title", "description"]
@@ -107,6 +114,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.prefetch_related("product_set").all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def destroy(self, request, *args, **kwargs):
         collection = self.get_object()
@@ -210,10 +218,25 @@ class CartItemViewSet(ModelViewSet):
         return {"cart_pk": self.kwargs["cart_pk"]}
 
 
-class CustomerViewSet(
-    GenericViewSet, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
-):
+class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.select_related("user").all()
     serializer_class = CustomerSerializer
+    permission_classes = [IsAdminUser]
 
-
+    @action(
+        detail=False,
+        methods=["get", "put", "patch", "delete"],
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request):
+        (customer, created) = Customer.objects.select_related("user").get_or_create(
+            user=request.user
+        )
+        if request.method == "GET":
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        elif request.method == "PUT":
+            serializer = CustomerSerializer(customer, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
