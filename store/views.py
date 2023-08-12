@@ -9,6 +9,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from store.filters import ProductFilter
 from store.paginations import StandardSizePagination
@@ -214,3 +215,5 @@ class CustomerViewSet(
 ):
     queryset = Customer.objects.select_related("user").all()
     serializer_class = CustomerSerializer
+
+
