@@ -56,13 +56,24 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["first_name", "last_name", "membership"]
+    list_display = [
+        "id",
+        "users_id",
+        "first_name",
+        "last_name",
+        "membership",
+        "phone",
+        "birth_date",
+    ]
     list_editable = ["membership"]
     list_per_page = 10
     list_select_related = ["user"]
     autocomplete_fields = ["user"]
-    ordering = ["user__first_name", "user__last_name"]
     search_fields = ["user__first_name__istartswith", "user__last_name__istartswith"]
+
+    @admin.display(ordering="user__id")
+    def users_id(self, customer):
+        return customer.user.id
 
     @admin.display(ordering="user__first_name")
     def first_name(self, customer):
