@@ -95,12 +95,12 @@ class AddCartItemSerializer(serializers.ModelSerializer):
             cart_item = CartItem.objects.get(cart_id=cart_id, product_id=product_id)
             cart_item.quantity += quantity
             cart_item.save()
-            self.instance = cart_item
+            self.customer = cart_item
         except CartItem.DoesNotExist:
-            self.instance = CartItem.objects.create(
+            self.customer = CartItem.objects.create(
                 cart_id=cart_id, **self.validated_data
             )
-        return self.instance
+        return self.customer
 
 
 class UpdateCartItemSerializer(serializers.ModelSerializer):
@@ -139,15 +139,26 @@ class CustomerSerializer(serializers.ModelSerializer):
         ]
 
     user_id = serializers.IntegerField(read_only=True)
-    first_name = serializers.SerializerMethodField(
-        method_name="get_first_name", read_only=True
-    )
-    last_name = serializers.SerializerMethodField(
-        method_name="get_last_name", read_only=True
-    )
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
 
     def get_first_name(self, customer: Customer):
         return customer.user.first_name
 
     def get_last_name(self, customer: Customer):
         return customer.user.last_name
+
+    def update(self, customer, validated_data):
+        customer.phone = validated_data.get("phone", customer.phone)
+        customer.birth_date = validated_data.get("birth_date", customer.birth_date)
+        customer.membership = validated_data.get("membership", customer.membership)
+
+        user = customer.user
+        user.first_name = validated_data.get("user", {}).get(
+            "first_name", user.first_name
+        )
+        user.last_name = validated_data.get("user", {}).get("last_name", user.last_name)
+
+        user.save()
+        customer.save()
+        return customer

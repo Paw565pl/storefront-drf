@@ -1,5 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    RetrieveAPIView,
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -8,6 +13,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     DestroyModelMixin,
     UpdateModelMixin,
+    ListModelMixin,
 )
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -15,7 +21,7 @@ from rest_framework.permissions import (
     IsAdminUser,
     DjangoModelPermissions,
 )
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from django_filters.rest_framework import DjangoFilterBackend
 from store.filters import ProductFilter
 from store.paginations import StandardSizePagination
@@ -221,22 +227,32 @@ class CartItemViewSet(ModelViewSet):
 class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.select_related("user").all()
     serializer_class = CustomerSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
-    @action(
-        detail=False,
-        methods=["get", "put", "patch", "delete"],
-        permission_classes=[IsAuthenticated],
-    )
-    def me(self, request):
-        (customer, created) = Customer.objects.select_related("user").get_or_create(
-            user=request.user
-        )
-        if request.method == "GET":
-            serializer = CustomerSerializer(customer)
-            return Response(serializer.data)
-        elif request.method == "PUT":
-            serializer = CustomerSerializer(customer, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    # @action(
+    #     detail=False,
+    #     methods=["get", "put", "patch", "delete"],
+    #     permission_classes=[IsAuthenticated],
+    # )
+    # def me(self, request):
+    #     (customer, created) = Customer.objects.select_related("user").get_or_create(
+    #         user=request.user
+    #     )
+    #     if request.method == "GET":
+    #         serializer = CustomerSerializer(customer)
+    #         return Response(serializer.data)
+    #     elif request.method == "PUT":
+    #         serializer = CustomerSerializer(customer, data=request.data)
+    #         serializer.is_valid(raise_exception=True)
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CustomerProfileViewSet(RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.select_related("user")
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        (user, created) = self.queryset.get_or_create(user=self.request.user)
+        return user
