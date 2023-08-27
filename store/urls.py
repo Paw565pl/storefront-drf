@@ -7,6 +7,7 @@ router.register(r"products", views.ProductViewSet, basename="products")
 router.register(r"collections", views.CollectionViewSet)
 router.register(r"carts", views.CartViewSet)
 router.register(r"customers", views.CustomerViewSet)
+router.register(r"orders", views.OrderViewSet, basename="orders")
 
 product_reviews_router = routers.NestedDefaultRouter(
     router, r"products", lookup="product"
@@ -20,7 +21,7 @@ cart_items_router.register(r"items", views.CartItemViewSet, basename="cart-items
 
 urlpatterns = [
     path(
-        "customers/me/",
+        "customers/me",
         views.CustomerProfileViewSet.as_view(),
         name="customer-profile",
     ),
