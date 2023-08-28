@@ -1,2 +1,2 @@
-truncate table store_collection
-truncate table store_product
+truncate store_collection,
+store_product;
