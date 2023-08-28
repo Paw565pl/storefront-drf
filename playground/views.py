@@ -13,6 +13,7 @@ from django.db.models import (
 from django.db.models.functions import Concat
 from django.db import transaction, connection
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessage
 from tags.models import TaggedItem
 from store.models import Product, OrderItem, Order, Customer, Collection
 
@@ -85,5 +86,15 @@ def index(request):
 
     # with connection.cursor() as cursor:
     #     queryset = cursor.execute("SELECT * FROM store_product")
+
+    # try:
+    #     send_mail("subject", "message", "info@test.com", ["user@test.com"])
+    #     mail_admins("subject", "message")
+    #     message = EmailMessage("subject", "message", "info@test.com", ["user@test.com"])
+    #     message.attach_file("media/store/images/pngtree-isolated-cat-on-white-background-png-image_7094927.png")
+    #     message.send()
+    # django-templated-mail
+    # except BadHeaderError:
+    #     pass
 
     return render(request, "hello.html", {"name": "user"})
