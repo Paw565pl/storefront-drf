@@ -55,7 +55,11 @@ from .permissions import FullDjangoModelPermissions, IsAdminOrReadOnly
 
 # Create your views here.
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.prefetch_related("promotions").prefetch_related("productimage_set").all()
+    queryset = (
+        Product.objects.prefetch_related("promotions")
+        .prefetch_related("productimage_set")
+        .all()
+    )
     serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]

@@ -59,7 +59,9 @@ class ProductSerializer(serializers.ModelSerializer):
     price_with_tax = serializers.SerializerMethodField(
         method_name="calculate_price_with_tax"
     )
-    images = ProductImageSerializer(many=True, source="productimage_set", read_only=True)
+    images = ProductImageSerializer(
+        many=True, source="productimage_set", read_only=True
+    )
     # collection = serializers.PrimaryKeyRelatedField(queryset=Collection.objects.all())
     # collection = serializers.StringRelatedField()
     # collection = CollectionSerializer()
