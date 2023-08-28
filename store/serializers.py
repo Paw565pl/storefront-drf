@@ -10,6 +10,7 @@ from .models import (
     Customer,
     Order,
     OrderItem,
+    ProductImage,
 )
 from .signals import order_created
 
@@ -233,3 +234,14 @@ class CreateOrderSerializer(serializers.Serializer):
             order_created.send_robust(self.__class__, order=order)
 
             return order
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["id", "image"]
+
+    def create(self, validated_data):
+        return ProductImage.objects.create(
+            product_id=self.context["product_id"], **validated_data
+        )

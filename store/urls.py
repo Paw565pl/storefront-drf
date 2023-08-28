@@ -9,15 +9,12 @@ router.register(r"carts", views.CartViewSet)
 router.register(r"customers", views.CustomerViewSet)
 router.register(r"orders", views.OrderViewSet, basename="orders")
 
-product_reviews_router = routers.NestedDefaultRouter(
-    router, r"products", lookup="product"
-)
-product_reviews_router.register(
-    r"reviews", views.ReviewViewSet, basename="product-reviews"
-)
+product_router = routers.NestedDefaultRouter(router, r"products", lookup="product")
+product_router.register(r"reviews", views.ReviewViewSet, basename="product-reviews")
+product_router.register(r"images", views.ProductImageViewSet, basename="product-images")
 
-cart_items_router = routers.NestedDefaultRouter(router, r"carts", lookup="cart")
-cart_items_router.register(r"items", views.CartItemViewSet, basename="cart-items")
+cart_router = routers.NestedDefaultRouter(router, r"carts", lookup="cart")
+cart_router.register(r"items", views.CartItemViewSet, basename="cart-items")
 
 urlpatterns = [
     path(
@@ -26,6 +23,6 @@ urlpatterns = [
         name="customer-profile",
     ),
     path("", include(router.urls)),
-    path("", include(product_reviews_router.urls)),
-    path("", include(cart_items_router.urls)),
+    path("", include(product_router.urls)),
+    path("", include(cart_router.urls)),
 ]

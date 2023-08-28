@@ -30,6 +30,7 @@ from .models import (
     Product,
     OrderItem,
     Collection,
+    ProductImage,
     Review,
     Cart,
     CartItem,
@@ -41,6 +42,7 @@ from .serializers import (
     CartSerializer,
     CreateOrderSerializer,
     OrderSerializer,
+    ProductImageSerializer,
     ProductSerializer,
     CollectionSerializer,
     ReviewSerializer,
@@ -127,6 +129,16 @@ class ProductViewSet(ModelViewSet):
 #         )
 #     product.delete()
 #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+
+    def get_queryset(self):
+        return ProductImage.objects.filter(product=self.kwargs["product_pk"])
+
+    def get_serializer_context(self):
+        return {"product_id": self.kwargs["product_pk"]}
 
 
 class CollectionViewSet(ModelViewSet):
