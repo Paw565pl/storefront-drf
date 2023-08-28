@@ -26,6 +26,17 @@ class CollectionSerializer(serializers.ModelSerializer):
         return collection.product_set.count()
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["id", "image"]
+
+    def create(self, validated_data):
+        return ProductImage.objects.create(
+            product_id=self.context["product_id"], **validated_data
+        )
+
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -39,6 +50,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "inventory",
             "collection",
             "promotions",
+            "images",
         ]
 
     # price = serializers.DecimalField(
@@ -47,6 +59,7 @@ class ProductSerializer(serializers.ModelSerializer):
     price_with_tax = serializers.SerializerMethodField(
         method_name="calculate_price_with_tax"
     )
+    images = ProductImageSerializer(many=True, source="productimage_set", read_only=True)
     # collection = serializers.PrimaryKeyRelatedField(queryset=Collection.objects.all())
     # collection = serializers.StringRelatedField()
     # collection = CollectionSerializer()
@@ -234,14 +247,3 @@ class CreateOrderSerializer(serializers.Serializer):
             order_created.send_robust(self.__class__, order=order)
 
             return order
-
-
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ["id", "image"]
-
-    def create(self, validated_data):
-        return ProductImage.objects.create(
-            product_id=self.context["product_id"], **validated_data
-        )
