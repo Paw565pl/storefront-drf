@@ -16,6 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessage
 from tags.models import TaggedItem
 from store.models import Product, OrderItem, Order, Customer, Collection
+from .tasks import notify_customers
 
 
 # Create your views here.
@@ -96,5 +97,8 @@ def index(request):
     # django-templated-mail
     # except BadHeaderError:
     #     pass
+
+    # celery
+    # notify_customers.delay("siema mordo")
 
     return render(request, "hello.html", {"name": "user"})
