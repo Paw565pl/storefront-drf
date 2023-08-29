@@ -1,3 +1,4 @@
+from django.forms.models import model_to_dict
 from rest_framework import status
 from model_bakery import baker
 from store.models import Collection, Product
@@ -50,3 +51,19 @@ class TestCreateCollection:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["id"] > 0
 
+
+@pytest.mark.django_db
+class TestRetrieveCollection:
+    def test_if_collection_exists_returns_200(self, api_client):
+        products_quantity = 10
+        collection = baker.make(Collection)
+        baker.make(Product, collection=collection, _quantity=products_quantity)
+
+        response = api_client.get(f"/store/collections/{collection.id}/")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            "id": collection.id,
+            "title": collection.title,
+            "products_count": products_quantity,
+        }
