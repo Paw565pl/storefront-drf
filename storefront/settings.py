@@ -177,3 +177,5 @@ EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""
 
 ADMINS = [("admin", "admin@test.com")]
+
+CELERY_BROKER_URL = "redis://localhost:6379/1"
