@@ -12,6 +12,8 @@ class Command(BaseCommand):
         sql = Path("./sql/seed_store.sql").read_text()
 
         with connection.cursor() as cursor:
-            cursor.execute(sql)
-
-        self.stdout.write("Done!", ending="")
+            try:
+                cursor.execute(sql)
+                self.stdout.write("Done!", ending="")
+            except Exception as e:
+                self.stdout.write("Data has been already been seeded!", ending="")
