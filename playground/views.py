@@ -23,8 +23,8 @@ from requests import get as get_request
 
 
 # Create your views here.
-@cache_page(5 * 60)
-def index(request):
+@cache_page(10 * 60)
+def slow(request):
     # queryset = (
     #     OrderItem.objects.select_related("product")
     #     .select_related("order__customer")
@@ -112,6 +112,5 @@ def index(request):
     #     cache.set(cache_key, data)
 
     response = get_request("https://httpbin.org/delay/2")
-    data = response.json()
 
     return render(request, "hello.html", {"name": "user"})
