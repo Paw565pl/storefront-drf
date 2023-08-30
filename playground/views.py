@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 from django.db.models import (
     Count,
     Max,
@@ -17,10 +19,11 @@ from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessag
 from tags.models import TaggedItem
 from store.models import Product, OrderItem, Order, Customer, Collection
 from .tasks import notify_customers
+from requests import get as get_request
 
 
 # Create your views here.
-# @transaction.atomic()
+@cache_page(5 * 60)
 def index(request):
     # queryset = (
     #     OrderItem.objects.select_related("product")
@@ -100,5 +103,15 @@ def index(request):
 
     # celery
     # notify_customers.delay("siema mordo")
+
+    # cache_key = "htppbin_result"
+
+    # if cache.get(cache_key) is None:
+    #     response = get_request("https://httpbin.org/delay/2")
+    #     data = response.json()
+    #     cache.set(cache_key, data)
+
+    response = get_request("https://httpbin.org/delay/2")
+    data = response.json()
 
     return render(request, "hello.html", {"name": "user"})

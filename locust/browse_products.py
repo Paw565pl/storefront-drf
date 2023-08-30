@@ -3,7 +3,7 @@ from locust import HttpUser, task, between
 
 
 class WebsiteUser(HttpUser):
-    wait_time = between(1, 15)
+    wait_time = between(1, 10)
 
     @task(2)
     def view_products(self):
@@ -26,6 +26,10 @@ class WebsiteUser(HttpUser):
             name="store/carts/:cart_id/items/",
             json={"product_id": product_id, "quantity": product_id // 2},
         )
+
+    @task(5)
+    def slow_endpoint(self):
+        self.client.get("")
 
     def on_start(self):
         response = self.client.post("/store/carts/")

@@ -165,7 +165,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=180),  # FIXME:
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=180),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
@@ -178,13 +178,13 @@ DJOSER = {
     },
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "localhost"
-EMAIL_PORT = "2525"
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "localhost"
+# EMAIL_PORT = "2525"
+# EMAIL_HOST_USER = ""
+# EMAIL_HOST_PASSWORD = ""
 
-ADMINS = [("admin", "admin@test.com")]
+# ADMINS = [("admin", "admin@test.com")]
 
 CELERY_BROKER_URL = "redis://localhost:6379/1"
 
@@ -196,3 +196,11 @@ CELERY_BROKER_URL = "redis://localhost:6379/1"
 #         # "kwargs": {}
 #     }
 # }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "TIMEOUT": 10 * 60,
+    }
+}
