@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from os import environ
-from datetime import timedelta
 from pathlib import Path
+from datetime import timedelta
 from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -168,8 +168,6 @@ DJOSER = {
 
 # ADMINS = [("admin", "admin@test.com")]
 
-CELERY_BROKER_URL = "redis://localhost:6379/1"
-
 # CELERY_BEAT_SCHEDULE = {
 #     "notify_customers": {
 #         "task": "playground.tasks.notify_customers",
@@ -178,14 +176,6 @@ CELERY_BROKER_URL = "redis://localhost:6379/1"
 #         # "kwargs": {}
 #     }
 # }
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",
-        "TIMEOUT": 10 * 60,
-    }
-}
 
 STORAGES = {
     "staticfiles": {
