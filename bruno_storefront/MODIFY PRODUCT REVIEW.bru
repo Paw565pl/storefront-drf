@@ -1,0 +1,21 @@
+meta {
+  name: MODIFY PRODUCT REVIEW
+  type: http
+  seq: 7
+}
+
+patch {
+  url: http://localhost:8000/api/products/anchovy-paste-56-g-tube/reviews/1/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQzNDIzOTkyLCJpYXQiOjE3MTE4ODc5OTIsImp0aSI6IjkxZjhlNzVjMTI1NTRmNWM5NTQ1Y2Q0ZTAzNTkyYzdlIiwidXNlcl9pZCI6MX0.ICVLykYgtpTQvw2OTsFrGNss5Za9ymo-oCUlbl7zQdY
+}
+
+body:json {
+  {
+    "rating": 3
+  }
+}

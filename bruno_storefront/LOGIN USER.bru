@@ -1,0 +1,18 @@
+meta {
+  name: LOGIN USER
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8000/api/auth/jwt/create/
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "test",
+    "password": "yuiop1234"
+  }
+}
