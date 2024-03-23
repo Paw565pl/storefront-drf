@@ -1,10 +1,11 @@
 version: "3.8"
+
 services:
+
   backend:
     build: .
     ports:
-      - 8000:8000
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      - "8000:8000"
     restart: on-failure
     environment:
       - DB_HOST=db
@@ -13,6 +14,7 @@ services:
       - redis
     volumes:
       - .:/backend
+
   celery:
     build: .
     command: celery -A storefront worker --loglevel=info
@@ -22,6 +24,7 @@ services:
       - redis
     volumes:
       - .:/backend
+
   celery-beat:
     build: .
     command: celery -A storefront beat --loglevel=info
@@ -31,10 +34,11 @@ services:
       - redis
     volumes:
       - .:/backend
+
   flower:
     build: .
     ports:
-      - 5555:5555
+      - "5555:5555"
     command: celery -A storefront flower
     restart: always
     depends_on:
@@ -42,27 +46,31 @@ services:
       - db
       - redis
       - celery
+      - celery-beat
     environment:
       - DEBUG=1
       - CELERY_BROKER=redis://redis:6379
       - CELERY_BACKEND=redis://redis:6379
+
   db:
-    image: postgres:15.4-alpine3.18
+    image: postgres:16-alpine
     ports:
-      - 5432:5432
+      - "5432:5432"
     restart: always
     environment:
       POSTGRES_PASSWORD: mysecretpassword
       POSTGRES_DB: storefront
     volumes:
       - pgdata:/var/lib/postgresql/data
+
   redis:
-    image: redis:7.2.0-alpine3.18
+    image: redis:7.2-alpine
     ports:
-      - 6379:6379
+      - "6379:6379"
     restart: always
     volumes:
       - redisdata:/data
+
 volumes:
   pgdata:
   redisdata:

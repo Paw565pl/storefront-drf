@@ -1,15 +1,18 @@
-FROM python:3.11.5-alpine3.18
+FROM python:3.12-alpine
 
-RUN adduser -S backend
-RUN addgroup backend && addgroup backend backend
+ENV POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_HOME='/usr/local' \
+  POETRY_VERSION=1.8.2
 
-WORKDIR /backend
+RUN apk add curl gcc python3-dev musl-dev linux-headers
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-RUN apk add --no-cache libpq-dev gcc python3-dev musl-dev linux-headers
-RUN pip install --upgrade pip
+WORKDIR /app
 
-COPY requirements.txt ./
+COPY poetry.lock pyproject.toml ./
 
-RUN pip install -r requirements.txt --cache-dir=/tmp/pip-cache
+RUN poetry install --all-extras --compile
 
 COPY . .
+
+CMD sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
