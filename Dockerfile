@@ -7,7 +7,7 @@ ENV POETRY_VIRTUALENVS_CREATE=false \
 RUN apk add curl gcc python3-dev musl-dev linux-headers
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-WORKDIR /app
+WORKDIR /backend
 
 COPY poetry.lock pyproject.toml ./
 
