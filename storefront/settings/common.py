@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "djoser",
-    "playground",
     "store",
     "tags",
     "likes",
