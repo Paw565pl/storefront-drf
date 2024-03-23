@@ -1,3 +1,5 @@
+from os import environ
+
 from .common import *
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -10,13 +12,18 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
+INSTALLED_APPS.append("debug_toolbar")
+MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
+INTERNAL_IPS = ["127.0.0.1"]
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "storefront",
         "USER": "postgres",
         "PASSWORD": "mysecretpassword",
-        "HOST": environ.get("DB_HOST", "0.0.0.0"),
+        "HOST": environ.get("DB_HOST", "localhost"),
         "PORT": "5432",
     }
 }
