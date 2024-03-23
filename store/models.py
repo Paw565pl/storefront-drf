@@ -1,9 +1,10 @@
 from uuid import uuid4
-from django.db import models
-from django.core.validators import MinValueValidator
-from django.conf import settings
 
-from store.validators import validate_file_size
+from django.conf import settings
+from django.core.validators import MinValueValidator
+from django.db import models
+
+from .validators import validate_file_size
 
 
 # Create your models here.
@@ -50,12 +51,12 @@ class ProductImage(models.Model):
 
 
 class Customer(models.Model):
-    MEMBERSHIP_BROZNE = "B"
+    MEMBERSHIP_BRONZE = "B"
     MEMBERSHIP_SILVER = "S"
     MEMBERSHIP_GOLD = "G"
 
     MEMBERSHIP_CHOICES = [
-        (MEMBERSHIP_BROZNE, "Bronze"),
+        (MEMBERSHIP_BRONZE, "Bronze"),
         (MEMBERSHIP_SILVER, "Silver"),
         (MEMBERSHIP_GOLD, "Gold"),
     ]
@@ -63,7 +64,7 @@ class Customer(models.Model):
     phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True)
     membership = models.CharField(
-        choices=MEMBERSHIP_CHOICES, max_length=1, default=MEMBERSHIP_BROZNE
+        choices=MEMBERSHIP_CHOICES, max_length=1, default=MEMBERSHIP_BRONZE
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 

@@ -1,7 +1,9 @@
 from decimal import Decimal
+
 from django.db import transaction
 from rest_framework import serializers
-from .models import (
+
+from store.models import (
     CartItem,
     Product,
     Collection,
@@ -22,7 +24,8 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     products_count = serializers.SerializerMethodField(method_name="get_products_count")
 
-    def get_products_count(self, collection: Collection):
+    @staticmethod
+    def get_products_count(collection: Collection):
         return collection.product_set.count()
 
 
@@ -62,6 +65,7 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(
         many=True, source="productimage_set", read_only=True
     )
+
     # collection = serializers.PrimaryKeyRelatedField(queryset=Collection.objects.all())
     # collection = serializers.StringRelatedField()
     # collection = CollectionSerializer()
@@ -69,7 +73,8 @@ class ProductSerializer(serializers.ModelSerializer):
     #     queryset=Collection.objects.all(), view_name="collection_detail"
     # )
 
-    def calculate_price_with_tax(self, product: Product):
+    @staticmethod
+    def calculate_price_with_tax(product: Product):
         return round(product.unit_price * Decimal(1.23), 2)
 
 
@@ -97,7 +102,8 @@ class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField(method_name="get_total_price")
 
-    def get_total_price(self, cart_item: CartItem):
+    @staticmethod
+    def get_total_price(cart_item: CartItem):
         return round(cart_item.product.unit_price * cart_item.quantity, 2)
 
 
@@ -108,7 +114,8 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 
     product_id = serializers.IntegerField()
 
-    def validate_product_id(self, product_id):
+    @staticmethod
+    def validate_product_id(product_id):
         if not Product.objects.filter(id=product_id).exists():
             raise serializers.ValidationError("Invalid product id")
         return product_id
@@ -145,7 +152,8 @@ class CartSerializer(serializers.ModelSerializer):
     cart_items = CartItemSerializer(many=True, source="cartitem_set", read_only=True)
     total_price = serializers.SerializerMethodField(method_name="get_total_price")
 
-    def get_total_price(self, cart: Cart):
+    @staticmethod
+    def get_total_price(cart: Cart):
         total_price = 0
         for cart_item in cart.cartitem_set.all():
             total_price += cart_item.product.unit_price * cart_item.quantity
@@ -169,10 +177,12 @@ class CustomerSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
 
-    def get_first_name(self, customer: Customer):
+    @staticmethod
+    def get_first_name(customer: Customer):
         return customer.user.first_name
 
-    def get_last_name(self, customer: Customer):
+    @staticmethod
+    def get_last_name(customer: Customer):
         return customer.user.last_name
 
     def update(self, customer, validated_data):
@@ -216,7 +226,8 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
 
-    def validate_cart_id(self, cart_id):
+    @staticmethod
+    def validate_cart_id(cart_id):
         if not Cart.objects.filter(pk=cart_id).exists():
             raise serializers.ValidationError("No cart with the given id was found.")
         if CartItem.objects.filter(pk=cart_id).count() == 0:
