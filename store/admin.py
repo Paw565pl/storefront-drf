@@ -1,11 +1,13 @@
 from typing import Any, List, Tuple
+
 from django.contrib import admin, messages
-from django.db.models.query import QuerySet
 from django.db.models.aggregates import Count
+from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
+from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
-from django.urls import reverse
+
 from .models import *
 
 
@@ -27,7 +29,8 @@ class ProductImageInline(admin.TabularInline):
     model = ProductImage
     readonly_fields = ["thumbnail"]
 
-    def thumbnail(self, instance: ProductImage):
+    @staticmethod
+    def thumbnail(instance: ProductImage):
         if instance.image.name != "":
             return format_html(f"<img src='{instance.image.url}' width='50px'/>")
         return ""
@@ -52,7 +55,8 @@ class ProductAdmin(admin.ModelAdmin):
             return "Low"
         return "Ok"
 
-    def collection_title(self, product):
+    @staticmethod
+    def collection_title(product):
         return product.collection.title
 
     @admin.action(description="Clear inventory")
