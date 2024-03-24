@@ -1,3 +1,6 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -61,6 +64,10 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ["unit_price", "last_update"]
     pagination_class = StandardSizePagination
 
+    @method_decorator([cache_page(60 * 5), vary_on_cookie])
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         if OrderItem.objects.filter(product_id=kwargs["pk"]).exists():
             return Response(
@@ -86,6 +93,10 @@ class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.prefetch_related("product_set").all()
     serializer_class = CollectionSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    @method_decorator([cache_page(60 * 5), vary_on_cookie])
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         collection = self.get_object()
