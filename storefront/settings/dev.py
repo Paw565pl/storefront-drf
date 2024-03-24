@@ -1,3 +1,4 @@
+from datetime import timedelta
 from os import environ
 
 from .common import *
@@ -36,3 +37,6 @@ CACHES = {
         "LOCATION": "redis://redis:6379",
     }
 }
+
+SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"] = timedelta(days=365)
+SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"] = timedelta(days=365)
