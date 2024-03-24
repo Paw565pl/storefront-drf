@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     "rest_framework",
+    "drf_spectacular",
     "djoser",
     "store",
     "tags",
@@ -119,6 +120,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -131,4 +133,9 @@ DJOSER = {
         "user": "core.serializers.UserSerializer",
         "current_user": "core.serializers.UserSerializer",
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "storefront",
+    "VERSION": "1.0.0",
 }
