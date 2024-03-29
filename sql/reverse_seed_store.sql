@@ -1,2 +1,0 @@
-truncate store_collection,
-store_product;
