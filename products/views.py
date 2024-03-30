@@ -1,7 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 
 from products.filters import ProductFilter
@@ -9,6 +8,7 @@ from products.mixins import MultipleFieldLookupMixin
 from products.models import Product, ProductImage
 from products.permissions import IsAdminOrReadOnly
 from products.serializers import ProductSerializer, ProductImageSerializer
+from products.utils import get_product_or_404
 
 
 # Create your views here.
@@ -36,13 +36,11 @@ class ProductImageViewSet(ModelViewSet):
     ordering_fields = ["id"]
 
     def get_queryset(self):
-        product_id = self.kwargs["product_pk"]
-        get_object_or_404(Product, pk=product_id)
-        return ProductImage.objects.filter(product=self.kwargs["product_pk"]).order_by(
-            "id"
-        )
+        product_identifier = self.kwargs["product_pk"]
+        product = get_product_or_404(product_identifier)
+        return ProductImage.objects.filter(product=product).order_by("id")
 
     def create(self, request, *args, **kwargs):
-        product_id = self.kwargs["product_pk"]
-        get_object_or_404(Product, pk=product_id)
+        product_identifier = self.kwargs["product_pk"]
+        get_product_or_404(product_identifier)
         return super().create(request, *args, **kwargs)
