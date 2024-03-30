@@ -32,12 +32,15 @@ class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
 
 class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
+    permission_classes = [IsAdminOrReadOnly]
     ordering_fields = ["id"]
 
     def get_queryset(self):
         product_id = self.kwargs["product_pk"]
         get_object_or_404(Product, pk=product_id)
-        return ProductImage.objects.filter(product=self.kwargs["product_pk"]).order_by("id")
+        return ProductImage.objects.filter(product=self.kwargs["product_pk"]).order_by(
+            "id"
+        )
 
     def create(self, request, *args, **kwargs):
         product_id = self.kwargs["product_pk"]
