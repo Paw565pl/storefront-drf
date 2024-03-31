@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from products.models import Product
+from products.models import Product, Review
 
 
 class ProductFilter(filters.FilterSet):
@@ -12,3 +12,12 @@ class ProductFilter(filters.FilterSet):
     class Meta:
         model = Product
         fields = ["title", "unit_price", "inventory", "last_update", "collection"]
+
+
+class ReviewFilter(filters.FilterSet):
+    rating = filters.RangeFilter()
+    created_at = filters.DateRangeFilter()
+
+    class Meta:
+        model = Review
+        fields = ["rating", "created_at"]
