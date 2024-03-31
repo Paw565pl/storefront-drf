@@ -1,3 +1,4 @@
+from decimal import Decimal
 from io import BytesIO
 
 from PIL import Image
@@ -5,7 +6,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.text import slugify
+from django_extensions.db import fields as extension_fields
 
 from products.validators import validate_file_size
 
@@ -13,13 +14,15 @@ from products.validators import validate_file_size
 # Create your models here.
 class Product(models.Model):
     title = models.CharField(max_length=255, unique=True)
-    slug = models.SlugField(max_length=255, unique=True)
+    slug = extension_fields.AutoSlugField(
+        max_length=255, unique=True, populate_from="title"
+    )
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
     )
     inventory = models.IntegerField(default=0)
-    last_update = models.DateTimeField(auto_now=True)
+    last_update = extension_fields.ModificationDateTimeField()
     collection = models.ForeignKey("Collection", on_delete=models.PROTECT)
     promotions = models.ManyToManyField("Promotion", blank=True)
 
@@ -33,10 +36,6 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.title
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
-        return super().save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
@@ -91,7 +90,7 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MinValueValidator(10)]
     )
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = extension_fields.CreationDateTimeField()
 
     class Meta:
         ordering = ["-created_at"]
