@@ -4,19 +4,40 @@ from django.views.decorators.vary import vary_on_cookie
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
+from products.exceptions import Conflict
 from products.filters import ProductFilter, ReviewFilter
 from products.mixins import MultipleFieldLookupMixin
-from products.models import Product, ProductImage, Review
+from products.models import Product, ProductImage, Review, Collection
 from products.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from products.serializers import (
     ProductSerializer,
     ProductImageSerializer,
     ReviewSerializer,
+    CollectionSerializer,
 )
 from products.utils import get_product_or_404
 
 
 # Create your views here.
+class CollectionViewSet(ModelViewSet):
+    queryset = Collection.objects.prefetch_related("product_set").all()
+    serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    ordering_fields = ["title"]
+
+    @method_decorator([cache_page(60 * 5), vary_on_cookie])
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        collection = self.get_object()
+        if Product.objects.filter(collection=collection).exists():
+            raise Conflict(
+                "Collection can not be deleted because it is associated with one or more products."
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
 class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
     queryset = (
         Product.objects.select_related("collection")
