@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from products.models import Collection, ProductImage, Review, Product, Promotion
 from products.utils import get_product_or_404
@@ -38,9 +39,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ["id", "author", "rating", "content", "created_at"]
 
+    author = serializers.CharField(read_only=True, source="author.username")
+
     def create(self, validated_data):
-        product_id = self.context["view"].kwargs["product_pk"]
-        return Review.objects.create(product_id, **validated_data)
+        user = self.context["request"].user
+        product_identifier = self.context["view"].kwargs["product_pk"]
+        product = get_product_or_404(product_identifier)
+
+        has_review = Review.objects.filter(author=user, product=product).exists()
+        if has_review:
+            raise PermissionDenied("You have already reviewed this product.")
+
+        return Review.objects.create(author=user, product=product, **validated_data)
 
 
 class PromotionSerializer(serializers.ModelSerializer):
