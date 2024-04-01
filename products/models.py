@@ -95,6 +95,11 @@ class Review(models.Model):
     class Meta:
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["rating"]), models.Index(fields=["created_at"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "author"], name="one_review_for_product_per_user"
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"Review by {self.author}"
