@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "djoser",
     "core",
+    "likes",
     "products",
 ]
 
