@@ -4,7 +4,7 @@ from django.views.decorators.vary import vary_on_cookie
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
-from products.exceptions import Conflict
+from core.exceptions import Conflict
 from products.filters import ProductFilter, ReviewFilter
 from products.mixins import MultipleFieldLookupMixin
 from products.models import Product, ProductImage, Review, Collection

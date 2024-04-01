@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import serializers
 
-from products.exceptions import Conflict
+from core.exceptions import Conflict
 from products.models import Collection, ProductImage, Review, Product, Promotion
 from products.utils import get_product_or_404
 
