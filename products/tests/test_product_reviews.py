@@ -29,7 +29,7 @@ class TestCreateProductReview:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_if_user_already_has_review_returns_403(
+    def test_if_user_already_has_review_returns_409(
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id
@@ -42,7 +42,7 @@ class TestCreateProductReview:
             f"/api/products/{product_id}/reviews/", test_review
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_409_CONFLICT
 
     def test_if_data_is_valid_returns_201(
         self, create_product, authenticated_api_client

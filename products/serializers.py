@@ -1,6 +1,7 @@
+from django.db import IntegrityError
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
+from products.exceptions import Conflict
 from products.models import Collection, ProductImage, Review, Product, Promotion
 from products.utils import get_product_or_404
 
@@ -46,11 +47,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         product_identifier = self.context["view"].kwargs["product_pk"]
         product = get_product_or_404(product_identifier)
 
-        has_review = Review.objects.filter(author=user, product=product).exists()
-        if has_review:
-            raise PermissionDenied("You have already reviewed this product.")
-
-        return Review.objects.create(author=user, product=product, **validated_data)
+        try:
+            return Review.objects.create(author=user, product=product, **validated_data)
+        except IntegrityError:
+            raise Conflict("You have already reviewed this product.")
 
 
 class PromotionSerializer(serializers.ModelSerializer):
