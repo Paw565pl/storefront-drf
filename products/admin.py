@@ -160,5 +160,37 @@ class PromotionAdmin(admin.ModelAdmin):
         return super().get_queryset(request).annotate(products_count=Count("product"))
 
     @admin.display(ordering="products_count")
-    def products_count(self, promotion: Promotion):
-        return promotion.products_count  # noqa
+    def products_count(self, promotion):
+        return promotion.products_count
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_per_page = 20
+    list_display = ["author", "product", "rating", "created_at"]
+    search_fields = ["author__username__icontains"]
+    list_filter = ["created_at"]
+    readonly_fields = ["author", "product", "likes_count", "dislikes_count"]
+    list_select_related = ["product"]
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                likes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
+                ),
+                dislikes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+                ),
+            )
+        )
+
+    @staticmethod
+    def likes_count(review):
+        return review.likes_count
+
+    @staticmethod
+    def dislikes_count(review):
+        return review.dislikes_count
