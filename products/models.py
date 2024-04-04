@@ -5,7 +5,12 @@ from PIL import Image
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.validators import MinValueValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator,
+    MinLengthValidator,
+    MaxLengthValidator,
+)
 from django.db import models
 from django_extensions.db import fields as extension_fields
 
@@ -80,8 +85,8 @@ class Collection(models.Model):
 
 
 class Promotion(models.Model):
-    description = models.CharField(max_length=255)
-    discount = models.FloatField()
+    description = models.CharField(max_length=255, validators=[MinLengthValidator(10)])
+    discount = models.FloatField(validators=[MinValueValidator(0)])
 
 
 class Review(models.Model):
@@ -90,9 +95,11 @@ class Review(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
     rating = models.PositiveIntegerField(
-        validators=[MinValueValidator(1), MinValueValidator(10)]
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
-    content = models.TextField()
+    content = models.TextField(
+        validators=[MinLengthValidator(10), MaxLengthValidator(1000)]
+    )
     created_at = extension_fields.CreationDateTimeField()
     likes_dislikes = GenericRelation(LikeDislike)
 
