@@ -92,12 +92,29 @@ class ProductReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filterset_class = ReviewFilter
-    ordering_fields = ["rating", "created_at"]
+    ordering_fields = [
+        "rating",
+        "created_at",
+        "likes_count",
+        "dislikes_count",
+    ]
 
     def get_queryset(self):
         product_identifier = self.kwargs["product_pk"]
         product = get_product_or_404(product_identifier)
-        return Review.objects.filter(product=product)
+        return (
+            Review.objects.filter(product=product)
+            .prefetch_related("likes_dislikes")
+            .annotate(
+                likes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
+                ),
+                dislikes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+                ),
+            )
+            .order_by("-created_at")
+        )
 
     def create(self, request, *args, **kwargs):
         product_identifier = self.kwargs["product_pk"]
@@ -113,3 +130,8 @@ class ProductLikeDislikeView(LikeDislikeView):
         product_identifier = self.kwargs["product_pk"]
         product = get_product_or_404(product_identifier)
         return product.id
+
+
+class ProductReviewLikeDislikeView(LikeDislikeView):
+    content_object_queryset = Review.objects.all()
+    integrity_error_message = "You have already liked or disliked this review."
