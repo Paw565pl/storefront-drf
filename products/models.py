@@ -85,8 +85,14 @@ class Collection(models.Model):
 
 
 class Promotion(models.Model):
-    description = models.CharField(max_length=255, validators=[MinLengthValidator(10)])
-    discount = models.FloatField(validators=[MinValueValidator(0)])
+    name = models.CharField(max_length=255)
+    discount = models.IntegerField(
+        verbose_name="discount (in %)",
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Review(models.Model):
