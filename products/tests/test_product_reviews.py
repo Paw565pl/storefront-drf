@@ -33,7 +33,7 @@ class TestCreateProductReview:
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id
-        test_review = {"content": "test", "rating": 5}
+        test_review = {"content": "test test test", "rating": 5}
 
         authenticated_api_client.post(
             f"/api/products/{product_id}/reviews/", test_review
@@ -48,7 +48,7 @@ class TestCreateProductReview:
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id
-        test_review = {"content": "test", "rating": 5}
+        test_review = {"content": "test test test", "rating": 5}
 
         response = authenticated_api_client.post(
             f"/api/products/{product_id}/reviews/", test_review
@@ -91,13 +91,13 @@ class TestUpdateProductReview:
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id
-        test_review = {"content": "test", "rating": 5}
+        test_review = {"content": "test test test", "rating": 5}
         create_response = authenticated_api_client.post(
             f"/api/products/{product_id}/reviews/", test_review
         )
 
         review_id = create_response.data["id"]
-        test_update_review = {"content": "test 123", "rating": 1}
+        test_update_review = {"content": "test 123 test test", "rating": 1}
         update_response = authenticated_api_client.put(
             f"/api/products/{product_id}/reviews/{review_id}/", test_update_review
         )
@@ -129,7 +129,7 @@ class TestDeleteProductReview:
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id
-        test_review = {"content": "test", "rating": 5}
+        test_review = {"content": "test test test", "rating": 5}
         create_response = authenticated_api_client.post(
             f"/api/products/{product_id}/reviews/", test_review
         )
