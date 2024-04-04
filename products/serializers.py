@@ -66,7 +66,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class PromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
-        fields = ["id", "description", "discount"]
+        fields = ["id", "name", "discount"]
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -97,7 +97,7 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(
         source="productimage_set", many=True, read_only=True
     )
-    promotions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    promotions = PromotionSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         collection_id = validated_data.get("collection_id")
