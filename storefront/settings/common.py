@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "django_admin_inline_paginator",
     "corsheaders",
     "rest_framework",
     "django_filters",

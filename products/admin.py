@@ -6,8 +6,9 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
+from django_admin_inline_paginator.admin import TabularInlinePaginated
 
-from products.models import Product, ProductImage, Collection
+from products.models import Product, ProductImage, Collection, Review
 
 
 # Register your models here.
@@ -34,7 +35,7 @@ class CollectionAdmin(admin.ModelAdmin):
     @admin.display(ordering="products_count")
     def products_count(self, collection):
         url = (
-            reverse("admin:store_product_changelist")
+            reverse("admin:products_product_changelist")
             + "?"
             + urlencode({"collection_id": str(collection.id)})
         )
@@ -44,9 +45,12 @@ class CollectionAdmin(admin.ModelAdmin):
         return super().get_queryset(request).annotate(products_count=Count("product"))
 
 
-class ProductImageInline(admin.TabularInline):
+class ProductImageInline(TabularInlinePaginated):
     model = ProductImage
     readonly_fields = ["thumbnail"]
+
+    per_page = 3
+    extra = 1
 
     @staticmethod
     def thumbnail(instance: ProductImage):
@@ -55,16 +59,23 @@ class ProductImageInline(admin.TabularInline):
         return ""
 
 
+class ProductReviewInline(TabularInlinePaginated):
+    model = Review
+    readonly_fields = ["author", "created_at"]
+
+    per_page = 3
+    extra = 1
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ["collection"]
     search_fields = ["title__icontains"]
-    readonly_fields = ["slug"]
+    readonly_fields = ["slug", "last_update"]
     actions = ["clear_inventory"]
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductReviewInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_filter = ["collection", "last_update", InventoryFilter]
-    list_editable = ["unit_price"]
     list_per_page = 20
     list_select_related = ["collection"]
 
