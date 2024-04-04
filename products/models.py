@@ -94,6 +94,7 @@ class Review(models.Model):
     )
     content = models.TextField()
     created_at = extension_fields.CreationDateTimeField()
+    likes_dislikes = GenericRelation(LikeDislike)
 
     class Meta:
         ordering = ["-created_at"]
