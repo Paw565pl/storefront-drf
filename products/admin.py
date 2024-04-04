@@ -1,13 +1,14 @@
 from typing import Any
 
 from django.contrib import admin, messages
-from django.db.models import QuerySet, Count
+from django.db.models import QuerySet, Count, Q
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
+from likes.models import LikeDislike
 from products.models import Product, ProductImage, Collection, Review, Promotion
 
 
@@ -17,7 +18,7 @@ class InventoryFilter(admin.SimpleListFilter):
     parameter_name = "inventory"
 
     def lookups(self, request, model_admin):
-        return (("<10", "Low"), (">=10", "Ok"))
+        return ("<10", "Low"), (">=10", "Ok")
 
     def queryset(self, request, queryset: QuerySet[Any]):
         if self.value() == "<10":
@@ -72,12 +73,26 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 20
     autocomplete_fields = ["collection", "promotions"]
     search_fields = ["title__icontains"]
-    readonly_fields = ["slug", "last_update"]
+    readonly_fields = ["slug", "last_update", "likes_count", "dislikes_count"]
     actions = ["clear_inventory"]
     inlines = [ProductImageInline, ProductReviewInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_filter = ["collection", "last_update", InventoryFilter]
     list_select_related = ["collection"]
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                likes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
+                ),
+                dislikes_count=Count(
+                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+                ),
+            )
+        )
 
     @admin.display(ordering="inventory")
     def inventory_status(self, product):
@@ -88,6 +103,14 @@ class ProductAdmin(admin.ModelAdmin):
     @staticmethod
     def collection_title(product):
         return product.collection.title
+
+    @staticmethod
+    def likes_count(product):
+        return product.likes_count
+
+    @staticmethod
+    def dislikes_count(product):
+        return product.dislikes_count
 
     @admin.action(description="Clear inventory")
     def clear_inventory(self, request, queryset: QuerySet[Any]):
@@ -129,6 +152,7 @@ class PromotionFilter(admin.SimpleListFilter):
 class PromotionAdmin(admin.ModelAdmin):
     list_per_page = 20
     list_display = ["name", "discount", "products_count"]
+    readonly_fields = ["products_count"]
     search_fields = ["name__icontains"]
     list_filter = [PromotionFilter]
 
