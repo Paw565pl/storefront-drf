@@ -7,7 +7,7 @@ from rest_framework import status
 
 @pytest.mark.django_db
 class TestListProductImages:
-    def test_if_product_does_not_exists_returns_404(self, api_client):
+    def test_if_product_does_not_exist_returns_404(self, api_client):
         response = api_client.get("/api/products/1/images/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -27,7 +27,7 @@ class TestListProductImages:
 
 @pytest.mark.django_db
 class TestCreateProductImage:
-    def test_if_product_does_not_exists_returns_404(self, admin_api_client):
+    def test_if_product_does_not_exist_returns_404(self, admin_api_client):
         response = admin_api_client.post("/api/products/1/images/", {})
 
         assert response.status_code == status.HTTP_404_NOT_FOUND

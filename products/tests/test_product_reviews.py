@@ -4,7 +4,7 @@ from rest_framework import status
 
 @pytest.mark.django_db
 class TestListProductReviews:
-    def test_if_product_does_not_exists_returns_404(self, api_client):
+    def test_if_product_does_not_exist_returns_404(self, api_client):
         response = api_client.get("/api/products/1/reviews/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -66,7 +66,7 @@ class TestUpdateProductReview:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_if_review_does_not_exists_returns_404(
+    def test_if_review_does_not_exist_returns_404(
         self, create_product, authenticated_api_client
     ):
         product_id = create_product.id

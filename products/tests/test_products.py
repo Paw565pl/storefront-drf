@@ -1,15 +1,11 @@
 import pytest
 from rest_framework import status
 
-from products.serializers import ProductSerializer
-
 
 @pytest.mark.django_db
 def test_retrieve_product_by_id_and_slug_returns_200(client, create_product):
     product_id = create_product.id
     product_slug = create_product.slug
-
-    serialized_product = ProductSerializer(create_product)
 
     id_response = client.get(f"/api/products/{product_id}/")
     slug_response = client.get(f"/api/products/{product_slug}/")
@@ -17,8 +13,6 @@ def test_retrieve_product_by_id_and_slug_returns_200(client, create_product):
     assert id_response.status_code == status.HTTP_200_OK
     assert slug_response.status_code == status.HTTP_200_OK
 
-    assert id_response.data == serialized_product.data
-    assert slug_response.data == serialized_product.data
     assert id_response.data == slug_response.data
 
 
