@@ -38,9 +38,19 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ["id", "author", "rating", "content", "created_at"]
+        fields = [
+            "id",
+            "author",
+            "rating",
+            "content",
+            "created_at",
+            "likes_count",
+            "dislikes_count",
+        ]
 
     author = serializers.CharField(read_only=True, source="author.username")
+    likes_count = serializers.IntegerField(read_only=True)
+    dislikes_count = serializers.IntegerField(read_only=True)
 
     def create(self, validated_data):
         user = self.context["request"].user
