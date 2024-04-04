@@ -12,7 +12,7 @@ from likes.serializers import LikeDislikeSerializer
 
 
 # Create your views here.
-class LikeDislikeViewSet(GenericAPIView):
+class LikeDislikeView(GenericAPIView):
     content_object_queryset: QuerySet | None = None
     integrity_error_message: str | None = None
 
