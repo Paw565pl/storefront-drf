@@ -70,15 +70,20 @@ class ProductSerializer(serializers.ModelSerializer):
             "unit_price",
             "inventory",
             "last_update",
+            "likes_count",
+            "dislikes_count",
             "collection",
             "collection_id",
             "promotions",
             "images",
         ]
 
-    slug = serializers.SlugField(read_only=True)
+    likes_count = serializers.IntegerField(read_only=True)
+    dislikes_count = serializers.IntegerField(read_only=True)
+
     collection = SimpleCollectionSerializer(read_only=True)
     collection_id = serializers.IntegerField(write_only=True)
+
     images = ProductImageSerializer(
         source="productimage_set", many=True, read_only=True
     )
