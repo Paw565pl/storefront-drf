@@ -33,7 +33,7 @@ class TestCreateProductImage:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_data_is_valid_returns_201(self, admin_api_client, create_product):
-        image = Image.new("RGB", (100, 100))
+        image = Image.new("RGB", (1, 1))
 
         tmp_file = tempfile.NamedTemporaryFile(suffix=".jpg")
         image.save(tmp_file)
