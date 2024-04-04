@@ -3,11 +3,13 @@ from io import BytesIO
 
 from PIL import Image
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import MinValueValidator
 from django.db import models
 from django_extensions.db import fields as extension_fields
 
+from likes.models import LikeDislike
 from products.validators import validate_file_size
 
 
@@ -25,6 +27,7 @@ class Product(models.Model):
     last_update = extension_fields.ModificationDateTimeField()
     collection = models.ForeignKey("Collection", on_delete=models.PROTECT)
     promotions = models.ManyToManyField("Promotion", blank=True)
+    likes_dislikes = GenericRelation(LikeDislike)
 
     class Meta:
         ordering = ["title"]
