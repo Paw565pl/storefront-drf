@@ -8,22 +8,21 @@ from django.utils.html import format_html
 from django.utils.http import urlencode
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
-from products.models import Product, ProductImage, Collection, Review
+from products.models import Product, ProductImage, Collection, Review, Promotion
 
 
 # Register your models here.
 class InventoryFilter(admin.SimpleListFilter):
     title = "Inventory"
     parameter_name = "inventory"
-    filter_values = [("<10", "Low"), (">=10", "Ok")]
 
     def lookups(self, request, model_admin):
-        return self.filter_values
+        return (("<10", "Low"), (">=10", "Ok"))
 
     def queryset(self, request, queryset: QuerySet[Any]):
-        if self.value() == self.filter_values[0][0]:
+        if self.value() == "<10":
             return queryset.filter(inventory__lt=10)
-        elif self.value() == self.filter_values[1][0]:
+        elif self.value() == ">=10":
             return queryset.filter(inventory__gte=10)
 
 
@@ -31,6 +30,7 @@ class InventoryFilter(admin.SimpleListFilter):
 class CollectionAdmin(admin.ModelAdmin):
     search_fields = ["title__icontains"]
     list_display = ["title", "products_count"]
+    list_per_page = 20
 
     @admin.display(ordering="products_count")
     def products_count(self, collection):
@@ -69,14 +69,14 @@ class ProductReviewInline(TabularInlinePaginated):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    autocomplete_fields = ["collection"]
+    list_per_page = 20
+    autocomplete_fields = ["collection", "promotions"]
     search_fields = ["title__icontains"]
     readonly_fields = ["slug", "last_update"]
     actions = ["clear_inventory"]
     inlines = [ProductImageInline, ProductReviewInline]
     list_display = ["title", "unit_price", "inventory_status", "collection_title"]
     list_filter = ["collection", "last_update", InventoryFilter]
-    list_per_page = 20
     list_select_related = ["collection"]
 
     @admin.display(ordering="inventory")
@@ -97,3 +97,44 @@ class ProductAdmin(admin.ModelAdmin):
             f"{updated_count} products were successfully updated",
             messages.SUCCESS,
         )
+
+
+class PromotionFilter(admin.SimpleListFilter):
+    title = "Promotion discount"
+    parameter_name = "discount"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("0-19", "0-19 %"),
+            ("20-39", "20-39 %"),
+            ("40-59", "40-59 %"),
+            ("60-79", "60-79 %"),
+            ("80-100", "80-100 %"),
+        )
+
+    def queryset(self, request, queryset: QuerySet[Any]):
+        if self.value() == "0-19":
+            return queryset.filter(discount__lte=19)
+        if self.value() == "20-39":
+            return queryset.filter(discount__range=(20, 39))
+        if self.value() == "40-59":
+            return queryset.filter(discount__range=(40, 59))
+        if self.value() == "60-79":
+            return queryset.filter(discount__range=(60, 79))
+        if self.value() == "80-100":
+            return queryset.filter(discount__range=(80, 100))
+
+
+@admin.register(Promotion)
+class PromotionAdmin(admin.ModelAdmin):
+    list_per_page = 20
+    list_display = ["name", "discount", "products_count"]
+    search_fields = ["name__icontains"]
+    list_filter = [PromotionFilter]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(products_count=Count("product"))
+
+    @admin.display(ordering="products_count")
+    def products_count(self, promotion: Promotion):
+        return promotion.products_count  # noqa
