@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -5,6 +6,8 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
 from core.exceptions import Conflict
+from likes.models import LikeDislike
+from likes.views import LikeDislikeView
 from products.filters import ProductFilter, ReviewFilter
 from products.mixins import MultipleFieldLookupMixin
 from products.models import Product, ProductImage, Review, Collection
@@ -43,17 +46,30 @@ class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
         Product.objects.select_related("collection")
         .prefetch_related("promotions")
         .prefetch_related("productimage_set")
+        .prefetch_related("likes_dislikes")
+        .annotate(
+            likes_count=Count(
+                "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
+            ),
+            dislikes_count=Count(
+                "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+            ),
+        )
+        .order_by("title")
         .all()
     )
     serializer_class = ProductSerializer
-    lookup_fields = ["id", "slug"]
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = ProductFilter
-    ordering_fields = ["title", "unit_price", "inventory", "last_update"]
-
-    @method_decorator([cache_page(60 * 5), vary_on_cookie])
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    lookup_fields = ["id", "slug"]
+    ordering_fields = [
+        "title",
+        "unit_price",
+        "inventory",
+        "last_update",
+        "likes_count",
+        "dislikes_count",
+    ]
 
 
 class ProductImageViewSet(ModelViewSet):
@@ -87,3 +103,13 @@ class ProductReviewViewSet(ModelViewSet):
         product_identifier = self.kwargs["product_pk"]
         get_product_or_404(product_identifier)
         return super().create(request, *args, **kwargs)
+
+
+class ProductLikeDislikeView(LikeDislikeView):
+    content_object_queryset = Product.objects.all()
+    integrity_error_message = "You have already liked or disliked this product."
+
+    def get_content_object_id(self, *args, **kwargs):
+        product_identifier = self.kwargs["product_pk"]
+        product = get_product_or_404(product_identifier)
+        return product.id
