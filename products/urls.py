@@ -6,6 +6,7 @@ from products.views import (
     ProductImageViewSet,
     ProductReviewViewSet,
     CollectionViewSet,
+    ProductLikeDislikeView,
 )
 
 router = routers.SimpleRouter()
@@ -19,4 +20,5 @@ product_router.register(r"reviews", ProductReviewViewSet, basename="product-revi
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(product_router.urls)),
+    path("products/<product_pk>/like_dislike/", ProductLikeDislikeView.as_view()),
 ]
