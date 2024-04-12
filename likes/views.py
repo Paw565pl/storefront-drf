@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 from django.db.models import QuerySet
 from rest_framework import status
-from rest_framework.generics import get_object_or_404, GenericAPIView
+from rest_framework.generics import get_object_or_404, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -12,7 +12,7 @@ from likes.serializers import LikeDislikeSerializer
 
 
 # Create your views here.
-class LikeDislikeView(GenericAPIView):
+class LikeDislikeView(RetrieveUpdateDestroyAPIView):
     content_object_queryset: QuerySet | None = None
     integrity_error_message: str | None = None
 
@@ -46,11 +46,6 @@ class LikeDislikeView(GenericAPIView):
             user=self.request.user,
         )
 
-    def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
     def post(self, request, *args, **kwargs):
         content_object_id = self.get_content_object_id()
         content_object = get_object_or_404(
@@ -72,23 +67,3 @@ class LikeDislikeView(GenericAPIView):
                 self.integrity_error_message
                 or "You have already liked or disliked this resource."
             )
-
-    def put(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(serializer.data)
-
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
