@@ -38,8 +38,8 @@ class Product(models.Model):
         ordering = ["title"]
         indexes = [
             models.Index(fields=["title"]),
+            models.Index(fields=["slug"]),
             models.Index(fields=["unit_price"]),
-            models.Index(fields=["inventory"]),
         ]
 
     def __str__(self) -> str:
