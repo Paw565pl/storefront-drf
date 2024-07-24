@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "core",
     "likes",
     "products",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 MIDDLEWARE = [

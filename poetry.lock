@@ -593,6 +593,17 @@ files = [
 django = "*"
 
 [[package]]
+name = "django-cleanup"
+version = "8.1.0"
+description = "Deletes old files."
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-cleanup-8.1.0.tar.gz", hash = "sha256:70df905076a44e7a111b31198199af633dee08876e199e6dce36ca8dd6b8b10f"},
+    {file = "django_cleanup-8.1.0-py2.py3-none-any.whl", hash = "sha256:7903873ea73b3f7e61e055340d27dba49b70634f60c87a573ad748e172836458"},
+]
+
+[[package]]
 name = "django-cors-headers"
 version = "4.4.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
@@ -2694,4 +2705,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "2120e0c2baacf6e6ea96bee27a22c8f166523db7e3f2b0f8ad9b2dfb34d85c54"
+content-hash = "bb1e26657e666a8cbbe4171c9f3bb5a3909ec83f2675a5058628e43ece60893a"
