@@ -13,9 +13,9 @@ from django.core.validators import (
 )
 from django.db import models
 from django_extensions.db import fields as extension_fields
+from file_validator.models import FileSizeValidator
 
 from likes.models import LikeDislike
-from products.validators import validate_file_size
 
 
 # Create your models here.
@@ -49,7 +49,8 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ImageField(
-        upload_to="products/images", validators=[validate_file_size]
+        upload_to="products/images",
+        validators=[FileSizeValidator(max_upload_file_size=5242880)],  # 5 MB
     )
 
     def save(self, *args, **kwargs):
