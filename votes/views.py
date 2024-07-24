@@ -7,17 +7,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.exceptions import Conflict
-from likes.models import LikeDislike
-from likes.serializers import LikeDislikeSerializer
+from votes.models import Vote
+from votes.serializers import VoteSerializer
 
 
 # Create your views here.
-class LikeDislikeView(RetrieveUpdateDestroyAPIView):
+class VoteView(RetrieveUpdateDestroyAPIView):
     content_object_queryset: QuerySet | None = None
     integrity_error_message: str | None = None
 
-    queryset = LikeDislike.objects.all()
-    serializer_class = LikeDislikeSerializer
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated]
 
     def dispatch(self, request, *args, **kwargs):
@@ -65,5 +65,5 @@ class LikeDislikeView(RetrieveUpdateDestroyAPIView):
         except IntegrityError:
             raise Conflict(
                 self.integrity_error_message
-                or "You have already liked or disliked this resource."
+                or "You have already voted on this resource."
             )

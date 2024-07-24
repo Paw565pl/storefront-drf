@@ -13,7 +13,7 @@ from django_extensions.db import fields as extension_fields
 from file_validator.models import FileSizeValidator
 from imagekit.models import ProcessedImageField
 
-from likes.models import LikeDislike
+from votes.models import Vote
 
 
 # Create your models here.
@@ -30,7 +30,7 @@ class Product(models.Model):
     last_update = extension_fields.ModificationDateTimeField()
     collection = models.ForeignKey("Collection", on_delete=models.PROTECT)
     promotions = models.ManyToManyField("Promotion", blank=True)
-    likes_dislikes = GenericRelation(LikeDislike)
+    votes = GenericRelation(Vote)
 
     class Meta:
         ordering = ["title"]
@@ -90,7 +90,7 @@ class Review(models.Model):
         validators=[MinLengthValidator(10), MaxLengthValidator(1000)]
     )
     created_at = extension_fields.CreationDateTimeField()
-    likes_dislikes = GenericRelation(LikeDislike)
+    votes = GenericRelation(Vote)
 
     class Meta:
         ordering = ["-created_at"]
