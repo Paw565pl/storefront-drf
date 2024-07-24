@@ -11,7 +11,7 @@ class CollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = ["id", "title", "products_count"]
 
-    products_count = serializers.SerializerMethodField()
+    products_count = serializers.SerializerMethodField(read_only=True)
 
     @staticmethod
     def get_products_count(collection: Collection):
