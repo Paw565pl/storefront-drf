@@ -6,8 +6,8 @@ from products.views import (
     ProductImageViewSet,
     ProductReviewViewSet,
     CollectionViewSet,
-    ProductLikeDislikeView,
-    ProductReviewLikeDislikeView,
+    ProductVoteView,
+    ProductReviewVoteView,
 )
 
 router = routers.SimpleRouter()
@@ -21,9 +21,9 @@ product_router.register(r"reviews", ProductReviewViewSet, basename="product-revi
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(product_router.urls)),
-    path("products/<product_pk>/like_dislike/", ProductLikeDislikeView.as_view()),
+    path("products/<product_pk>/vote/", ProductVoteView.as_view()),
     path(
-        "products/<product_pk>/reviews/<pk>/like_dislike/",
-        ProductReviewLikeDislikeView.as_view(),
+        "products/<product_pk>/reviews/<pk>/vote/",
+        ProductReviewVoteView.as_view(),
     ),
 ]

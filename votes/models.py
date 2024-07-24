@@ -5,13 +5,13 @@ from django.db import models
 
 
 # Create your models here.
-class LikeDislike(models.Model):
+class Vote(models.Model):
     DISLIKE = -1
     LIKE = 1
 
     VOTES = ((DISLIKE, "Dislike"), (LIKE, "Like"))
 
-    vote = models.SmallIntegerField(verbose_name="Like/Dislike", choices=VOTES)
+    value = models.SmallIntegerField(verbose_name="Like/Dislike", choices=VOTES)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
@@ -32,4 +32,4 @@ class LikeDislike(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.user} {self.get_vote_display()} {self.content_type.model} {self.object_id}"
+        return f"{self.user} {self.get_value_display()} {self.content_type.model} {self.object_id}"

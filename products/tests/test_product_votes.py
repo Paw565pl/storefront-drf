@@ -6,12 +6,12 @@ from rest_framework import status
 class TestCreateProductVote:
     def test_if_user_is_anonymous_returns_401(self, api_client, create_product):
         product_id = create_product.id
-        response = api_client.post(f"/api/products/{product_id}/like_dislike/", {})
+        response = api_client.post(f"/api/products/{product_id}/vote/", {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_product_does_not_exist_returns_404(self, authenticated_api_client):
-        response = authenticated_api_client.post("/api/products/1/like_dislike/", {})
+        response = authenticated_api_client.post("/api/products/1/vote/", {})
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -20,7 +20,7 @@ class TestCreateProductVote:
     ):
         product_id = create_product.id
         response = authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", {}
+            f"/api/products/{product_id}/vote/", {}
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -29,13 +29,11 @@ class TestCreateProductVote:
         self, authenticated_api_client, create_product
     ):
         product_id = create_product.id
-        payload = {"vote": 1}
+        payload = {"value": 1}
 
-        authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", payload
-        )
+        authenticated_api_client.post(f"/api/products/{product_id}/vote/", payload)
         response = authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", payload
+            f"/api/products/{product_id}/vote/", payload
         )
 
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -44,26 +42,26 @@ class TestCreateProductVote:
         self, authenticated_api_client, create_product
     ):
         product_id = create_product.id
-        payload = {"vote": 1}
+        payload = {"value": 1}
 
         response = authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", payload
+            f"/api/products/{product_id}/vote/", payload
         )
 
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data["vote"] == payload["vote"]
+        assert response.data["value"] == payload["value"]
 
 
 @pytest.mark.django_db
 class TestRetrieveProductVote:
     def test_if_user_is_anonymous_returns_401(self, api_client, create_product):
         product_id = create_product.id
-        response = api_client.get(f"/api/products/{product_id}/like_dislike/")
+        response = api_client.get(f"/api/products/{product_id}/vote/")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_product_does_not_exist_returns_404(self, authenticated_api_client):
-        response = authenticated_api_client.get("/api/products/1/like_dislike/")
+        response = authenticated_api_client.get("/api/products/1/vote/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -71,38 +69,32 @@ class TestRetrieveProductVote:
         self, authenticated_api_client, create_product
     ):
         product_id = create_product.id
-        response = authenticated_api_client.get(
-            f"/api/products/{product_id}/like_dislike/"
-        )
+        response = authenticated_api_client.get(f"/api/products/{product_id}/vote/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_vote_exists_returns_200(self, authenticated_api_client, create_product):
         product_id = create_product.id
 
-        payload = {"vote": 1}
-        authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", payload
-        )
+        payload = {"value": 1}
+        authenticated_api_client.post(f"/api/products/{product_id}/vote/", payload)
 
-        response = authenticated_api_client.get(
-            f"/api/products/{product_id}/like_dislike/"
-        )
+        response = authenticated_api_client.get(f"/api/products/{product_id}/vote/")
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["vote"] == payload["vote"]
+        assert response.data["value"] == payload["value"]
 
 
 @pytest.mark.django_db
 class TestUpdateProductVote:
     def test_if_user_is_anonymous_returns_401(self, api_client, create_product):
         product_id = create_product.id
-        response = api_client.put(f"/api/products/{product_id}/like_dislike/", {})
+        response = api_client.put(f"/api/products/{product_id}/vote/", {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_product_does_not_exist_returns_404(self, authenticated_api_client):
-        response = authenticated_api_client.put("/api/products/1/like_dislike/", {})
+        response = authenticated_api_client.put("/api/products/1/vote/", {})
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -110,9 +102,7 @@ class TestUpdateProductVote:
         self, authenticated_api_client, create_product
     ):
         product_id = create_product.id
-        response = authenticated_api_client.put(
-            f"/api/products/{product_id}/like_dislike/", {}
-        )
+        response = authenticated_api_client.put(f"/api/products/{product_id}/vote/", {})
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -121,14 +111,12 @@ class TestUpdateProductVote:
     ):
         product_id = create_product.id
 
-        create_payload = {"vote": 1}
+        create_payload = {"value": 1}
         authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", create_payload
+            f"/api/products/{product_id}/vote/", create_payload
         )
 
-        response = authenticated_api_client.put(
-            f"/api/products/{product_id}/like_dislike/", {}
-        )
+        response = authenticated_api_client.put(f"/api/products/{product_id}/vote/", {})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -137,30 +125,30 @@ class TestUpdateProductVote:
     ):
         product_id = create_product.id
 
-        create_payload = {"vote": 1}
+        create_payload = {"value": 1}
         authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", create_payload
+            f"/api/products/{product_id}/vote/", create_payload
         )
 
-        update_payload = {"vote": -1}
+        update_payload = {"value": -1}
         response = authenticated_api_client.put(
-            f"/api/products/{product_id}/like_dislike/", update_payload
+            f"/api/products/{product_id}/vote/", update_payload
         )
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["vote"] == update_payload["vote"]
+        assert response.data["value"] == update_payload["value"]
 
 
 @pytest.mark.django_db
 class TestDeleteProductVote:
     def test_if_user_is_anonymous_returns_401(self, api_client, create_product):
         product_id = create_product.id
-        response = api_client.delete(f"/api/products/{product_id}/like_dislike/")
+        response = api_client.delete(f"/api/products/{product_id}/vote/")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_if_product_does_not_exist_returns_404(self, authenticated_api_client):
-        response = authenticated_api_client.delete("/api/products/1/like_dislike/")
+        response = authenticated_api_client.delete("/api/products/1/vote/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -169,7 +157,7 @@ class TestDeleteProductVote:
     ):
         product_id = create_product.id
         response = authenticated_api_client.delete(
-            f"/api/products/{product_id}/like_dislike/",
+            f"/api/products/{product_id}/vote/",
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -177,13 +165,9 @@ class TestDeleteProductVote:
     def test_if_vote_exists_returns_204(self, authenticated_api_client, create_product):
         product_id = create_product.id
 
-        payload = {"vote": 1}
-        authenticated_api_client.post(
-            f"/api/products/{product_id}/like_dislike/", payload
-        )
+        payload = {"value": 1}
+        authenticated_api_client.post(f"/api/products/{product_id}/vote/", payload)
 
-        response = authenticated_api_client.delete(
-            f"/api/products/{product_id}/like_dislike/"
-        )
+        response = authenticated_api_client.delete(f"/api/products/{product_id}/vote/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
