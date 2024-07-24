@@ -106,7 +106,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if not collection_exists:
             raise serializers.ValidationError("Collection does not exist.")
 
-        return Product.objects.create(**validated_data)
+        return super().create(validated_data)
 
     def update(self, instance: Product, validated_data):
         collection_id = validated_data.get("collection_id")
