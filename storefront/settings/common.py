@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "file_validator",
+    "imagekit",
     "djoser",
     "core",
     "likes",
