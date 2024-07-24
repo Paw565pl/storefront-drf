@@ -4,15 +4,15 @@ from rest_framework import status
 
 @pytest.mark.django_db
 class TestListProducts:
-    def test_if_no_products_exist_returns_200(self, client):
-        response = client.get("/api/products/")
+    def test_if_no_products_exist_returns_200(self, api_client):
+        response = api_client.get("/api/products/")
         results = response.data.get("results")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(results) == 0
 
-    def test_if_products_exist_returns_200(self, create_product, client):
-        response = client.get("/api/products/")
+    def test_if_products_exist_returns_200(self, create_product, api_client):
+        response = api_client.get("/api/products/")
         results = response.data.get("results")
 
         assert response.status_code == status.HTTP_200_OK
@@ -21,17 +21,19 @@ class TestListProducts:
 
 @pytest.mark.django_db
 class TestRetrieveProducts:
-    def test_if_product_does_not_exist_returns_404(self, client):
-        response = client.get("/api/products/1/")
+    def test_if_product_does_not_exist_returns_404(self, api_client):
+        response = api_client.get("/api/products/1/")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_retrieve_product_by_id_or_slug_returns_200(self, client, create_product):
+    def test_retrieve_product_by_id_or_slug_returns_200(
+        self, api_client, create_product
+    ):
         product_id = create_product.id
         product_slug = create_product.slug
 
-        id_response = client.get(f"/api/products/{product_id}/")
-        slug_response = client.get(f"/api/products/{product_slug}/")
+        id_response = api_client.get(f"/api/products/{product_id}/")
+        slug_response = api_client.get(f"/api/products/{product_slug}/")
 
         assert id_response.status_code == status.HTTP_200_OK
         assert slug_response.status_code == status.HTTP_200_OK
@@ -41,8 +43,8 @@ class TestRetrieveProducts:
 
 @pytest.mark.django_db
 class TestCreateProduct:
-    def test_if_user_is_anonymous_returns_401(self, client):
-        response = client.post("/api/products/", {})
+    def test_if_user_is_anonymous_returns_401(self, api_client):
+        response = api_client.post("/api/products/", {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -76,8 +78,8 @@ class TestCreateProduct:
 
 @pytest.mark.django_db
 class TestUpdateProduct:
-    def test_if_user_is_anonymous_returns_401(self, client):
-        response = client.put("/api/products/1/", {})
+    def test_if_user_is_anonymous_returns_401(self, api_client):
+        response = api_client.put("/api/products/1/", {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -116,8 +118,8 @@ class TestUpdateProduct:
 
 @pytest.mark.django_db
 class TestPartialUpdateProduct:
-    def test_if_user_is_anonymous_returns_401(self, client):
-        response = client.patch("/api/products/1/", {})
+    def test_if_user_is_anonymous_returns_401(self, api_client):
+        response = api_client.patch("/api/products/1/", {})
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -151,8 +153,8 @@ class TestPartialUpdateProduct:
 
 @pytest.mark.django_db
 class TestDeleteProduct:
-    def test_if_user_is_anonymous_returns_401(self, client):
-        response = client.delete("/api/products/1/")
+    def test_if_user_is_anonymous_returns_401(self, api_client):
+        response = api_client.delete("/api/products/1/")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
