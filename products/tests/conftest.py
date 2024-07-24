@@ -17,8 +17,10 @@ def create_product(create_collection):
 
 
 @pytest.fixture
-def create_product_image(create_product):
-    image = baker.make(ProductImage, product=create_product, _create_files=True)
+def create_product_image(create_product, create_image_file):
+    file = create_image_file()
+
+    image = baker.make(ProductImage, product=create_product, image=file)
     return image
 
 

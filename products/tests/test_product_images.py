@@ -1,7 +1,4 @@
-import tempfile
-
 import pytest
-from PIL import Image
 from rest_framework import status
 
 
@@ -32,15 +29,13 @@ class TestCreateProductImage:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_if_data_is_valid_returns_201(self, admin_api_client, create_product):
-        image = Image.new("RGB", (1, 1))
-
-        tmp_file = tempfile.NamedTemporaryFile(suffix=".jpg")
-        image.save(tmp_file)
-        tmp_file.seek(0)
+    def test_if_data_is_valid_returns_201(
+        self, admin_api_client, create_product, create_image_file
+    ):
+        file = create_image_file()
 
         product_id = create_product.id
-        test_image = {"image": tmp_file}
+        test_image = {"image": file}
 
         response = admin_api_client.post(
             f"/api/products/{product_id}/images/", test_image
