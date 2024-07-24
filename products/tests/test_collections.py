@@ -6,38 +6,19 @@ from products.models import Collection
 
 @pytest.mark.django_db
 class TestListCollection:
-    def test_if_no_collections_exist_returns_200(self, api_client):
-        response = api_client.get(
-            "/api/collections/", headers={"Cache-Control": "no-store"}
-        )
+    def test_if_collections_does_not_exist_returns_200(self, api_client):
+        response = api_client.get("/api/collections/")
         results = response.data.get("results")
-        print(results)
 
         assert response.status_code == status.HTTP_200_OK
         assert len(results) == 0
 
-    def test_if_collections_exist_returns_200(self, create_collection, api_client):
-        response = api_client.get(
-            "/api/collections/", headers={"Cache-Control": "no-store"}
-        )
+    def test_if_collections_exist_returns_200(self, api_client, create_collection):
+        response = api_client.get("/api/collections/")
         results = response.data.get("results")
-        print(results)
+
         assert response.status_code == status.HTTP_200_OK
         assert len(results) == 1
-
-
-@pytest.mark.django_db
-class TestRetrieveCollection:
-    def test_if_collection_does_not_exist_returns_404(self, api_client):
-        response = api_client.get("/api/collections/1/")
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_retrieve_collection_by_id_returns_200(self, api_client, create_collection):
-        collection_id = create_collection.id
-        response = api_client.get(f"/api/collections/{collection_id}/")
-
-        assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
@@ -53,8 +34,7 @@ class TestCreateCollection:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_data_is_invalid_returns_400(self, admin_api_client):
-        payload = {"title": ""}
-        response = admin_api_client.post("/api/collections/", payload)
+        response = admin_api_client.post("/api/collections/", {})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -69,15 +49,33 @@ class TestCreateCollection:
 
 
 @pytest.mark.django_db
+class TestRetrieveCollection:
+    def test_if_collection_does_not_exist_returns_404(self, api_client):
+        response = api_client.get("/api/collections/1/")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_retrieve_collection_by_id_returns_200(self, api_client, create_collection):
+        collection_id = create_collection.id
+
+        response = api_client.get(f"/api/collections/{collection_id}/")
+        result = response.data
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result["id"] == collection_id
+        assert result["title"] == create_collection.title
+
+
+@pytest.mark.django_db
 class TestUpdateCollection:
-    def test_if_user_is_anonymous_returns_401(self, create_collection, api_client):
+    def test_if_user_is_anonymous_returns_401(self, api_client, create_collection):
         collection_id = create_collection.id
         response = api_client.put(f"/api/collections/{collection_id}/", {})
 
         assert response.status_code == 401
 
     def test_if_user_is_not_admin_returns_403(
-        self, create_collection, authenticated_api_client
+        self, authenticated_api_client, create_collection
     ):
         collection_id = create_collection.id
         response = authenticated_api_client.put(
@@ -86,15 +84,18 @@ class TestUpdateCollection:
 
         assert response.status_code == 403
 
-    def test_if_data_is_invalid_returns_400(self, create_collection, admin_api_client):
-        collection_id = create_collection.id
-        payload = {"title": ""}
+    def test_if_collection_does_not_exist_returns_404(self, admin_api_client):
+        response = admin_api_client.put("/api/collections/1/")
 
-        response = admin_api_client.put(f"/api/collections/{collection_id}/", payload)
+        assert response.status_code == 404
+
+    def test_if_data_is_invalid_returns_400(self, admin_api_client, create_collection):
+        collection_id = create_collection.id
+        response = admin_api_client.put(f"/api/collections/{collection_id}/", {})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_if_data_is_valid_returns_200(self, create_collection, admin_api_client):
+    def test_if_data_is_valid_returns_200(self, admin_api_client, create_collection):
         collection_id = create_collection.id
         payload = {"title": "test"}
 
@@ -107,14 +108,14 @@ class TestUpdateCollection:
 
 @pytest.mark.django_db
 class TestPartialUpdateCollection:
-    def test_if_user_is_anonymous_returns_401(self, create_collection, api_client):
+    def test_if_user_is_anonymous_returns_401(self, api_client, create_collection):
         collection_id = create_collection.id
         response = api_client.patch(f"/api/collections/{collection_id}/", {})
 
         assert response.status_code == 401
 
     def test_if_user_is_not_admin_returns_403(
-        self, create_collection, authenticated_api_client
+        self, authenticated_api_client, create_collection
     ):
         collection_id = create_collection.id
         response = authenticated_api_client.patch(
@@ -123,7 +124,12 @@ class TestPartialUpdateCollection:
 
         assert response.status_code == 403
 
-    def test_if_data_is_invalid_returns_400(self, create_collection, admin_api_client):
+    def test_if_collection_does_not_exist_returns_404(self, admin_api_client):
+        response = admin_api_client.patch("/api/collections/1/", {})
+
+        assert response.status_code == 404
+
+    def test_if_data_is_invalid_returns_400(self, admin_api_client, create_collection):
         collection_id = create_collection.id
         payload = {"title": ""}
 
@@ -131,7 +137,7 @@ class TestPartialUpdateCollection:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_if_data_is_valid_returns_200(self, create_collection, admin_api_client):
+    def test_if_data_is_valid_returns_200(self, admin_api_client, create_collection):
         collection_id = create_collection.id
         payload = {"title": "test"}
 
@@ -144,29 +150,34 @@ class TestPartialUpdateCollection:
 
 @pytest.mark.django_db
 class TestDeleteCollection:
-    def test_if_user_is_anonymous_returns_401(self, create_collection, api_client):
+    def test_if_user_is_anonymous_returns_401(self, api_client, create_collection):
         collection_id = create_collection.id
         response = api_client.delete(f"/api/collections/{collection_id}/")
 
         assert response.status_code == 401
 
     def test_if_user_is_not_admin_returns_403(
-        self, create_collection, authenticated_api_client
+        self, authenticated_api_client, create_collection
     ):
         collection_id = create_collection.id
         response = authenticated_api_client.delete(f"/api/collections/{collection_id}/")
 
         assert response.status_code == 403
 
+    def test_if_collection_does_not_exist_returns_404(self, admin_api_client):
+        response = admin_api_client.delete("/api/collections/1/")
+
+        assert response.status_code == 404
+
     def test_if_collection_has_products_returns_409(
-        self, create_product, admin_api_client
+        self, admin_api_client, create_product
     ):
         collection_id = create_product.collection.id
         response = admin_api_client.delete(f"/api/collections/{collection_id}/")
 
         assert response.status_code == 409
 
-    def test_if_user_is_admin_returns_204(self, create_collection, admin_api_client):
+    def test_if_user_is_admin_returns_204(self, admin_api_client, create_collection):
         collection_id = create_collection.id
         response = admin_api_client.delete(f"/api/collections/{collection_id}/")
 
