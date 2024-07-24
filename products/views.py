@@ -28,7 +28,8 @@ class CollectionViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     ordering_fields = ["title"]
 
-    @method_decorator([cache_page(60 * 5), vary_on_cookie])
+    # cache responses for 10 minutes
+    @method_decorator([cache_page(60 * 10), vary_on_cookie])
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
