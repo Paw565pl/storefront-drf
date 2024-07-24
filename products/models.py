@@ -102,4 +102,4 @@ class Review(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Review by {self.author}"
+        return f"Review {self.id}"
