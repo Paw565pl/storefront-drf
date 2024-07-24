@@ -55,7 +55,6 @@ class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
                 "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
             ),
         )
-        .order_by("title")
         .all()
     )
     serializer_class = ProductSerializer
@@ -102,6 +101,7 @@ class ProductReviewViewSet(ModelViewSet):
     def get_queryset(self):
         product_identifier = self.kwargs["product_pk"]
         product = get_product_or_404(product_identifier)
+
         return (
             Review.objects.filter(product=product)
             .prefetch_related("likes_dislikes")
@@ -114,6 +114,7 @@ class ProductReviewViewSet(ModelViewSet):
                 ),
             )
             .order_by("-created_at")
+            .all()
         )
 
     def create(self, request, *args, **kwargs):
