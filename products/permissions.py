@@ -11,7 +11,7 @@ class IsAdminOrReadOnly(BasePermission):
 class IsAuthorOrReadOnly(BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.
-    Assumes the model instance has an `owner` attribute.
+    Assumes the model instance has an `author` attribute.
     """
 
     message = "Only the author of an object can modify or delete it."
@@ -22,5 +22,5 @@ class IsAuthorOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
 
-        # Instance must have an attribute named `owner`.
+        # Instance must have an attribute named `author`.
         return obj.author == request.user
