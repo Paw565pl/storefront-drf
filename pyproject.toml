@@ -24,6 +24,7 @@ pillow = "^10.2.0"
 drf-spectacular = "^0.27.1"
 django-extensions = "^3.2.3"
 django-admin-inline-paginator = "^0.4.0"
+file-validator = "^1.0.9"
 
 
 [tool.poetry.group.dev.dependencies]
