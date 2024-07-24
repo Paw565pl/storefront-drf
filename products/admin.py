@@ -85,10 +85,8 @@ class ProductAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .annotate(
-                likes_count=Count("votes", filter=Q(likes_dislikes__vote=Vote.LIKE)),
-                dislikes_count=Count(
-                    "votes", filter=Q(likes_dislikes__vote=Vote.DISLIKE)
-                ),
+                likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
+                dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
             )
         )
 
@@ -136,13 +134,13 @@ class PromotionFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset: QuerySet[Any]):
         if self.value() == "0-19":
             return queryset.filter(discount__lte=19)
-        if self.value() == "20-39":
+        elif self.value() == "20-39":
             return queryset.filter(discount__range=(20, 39))
-        if self.value() == "40-59":
+        elif self.value() == "40-59":
             return queryset.filter(discount__range=(40, 59))
-        if self.value() == "60-79":
+        elif self.value() == "60-79":
             return queryset.filter(discount__range=(60, 79))
-        if self.value() == "80-100":
+        elif self.value() == "80-100":
             return queryset.filter(discount__range=(80, 100))
 
 
@@ -176,10 +174,8 @@ class ReviewAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .annotate(
-                likes_count=Count("votes", filter=Q(likes_dislikes__vote=Vote.LIKE)),
-                dislikes_count=Count(
-                    "votes", filter=Q(likes_dislikes__vote=Vote.DISLIKE)
-                ),
+                likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
+                dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
             )
         )
 
