@@ -55,6 +55,7 @@ class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
                 "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
             ),
         )
+        .order_by("title")
         .all()
     )
     serializer_class = ProductSerializer
