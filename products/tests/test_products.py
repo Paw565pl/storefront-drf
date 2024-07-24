@@ -3,17 +3,40 @@ from rest_framework import status
 
 
 @pytest.mark.django_db
-def test_retrieve_product_by_id_and_slug_returns_200(client, create_product):
-    product_id = create_product.id
-    product_slug = create_product.slug
+class TestListProducts:
+    def test_if_no_products_exist_returns_200(self, client):
+        response = client.get("/api/products/")
+        results = response.data.get("results")
 
-    id_response = client.get(f"/api/products/{product_id}/")
-    slug_response = client.get(f"/api/products/{product_slug}/")
+        assert response.status_code == status.HTTP_200_OK
+        assert len(results) == 0
 
-    assert id_response.status_code == status.HTTP_200_OK
-    assert slug_response.status_code == status.HTTP_200_OK
+    def test_if_products_exist_returns_200(self, create_product, client):
+        response = client.get("/api/products/")
+        results = response.data.get("results")
 
-    assert id_response.data == slug_response.data
+        assert response.status_code == status.HTTP_200_OK
+        assert len(results) == 1
+
+
+@pytest.mark.django_db
+class TestRetrieveProducts:
+    def test_if_product_does_not_exist_returns_404(self, client):
+        response = client.get("/api/products/1/")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_retrieve_product_by_id_or_slug_returns_200(self, client, create_product):
+        product_id = create_product.id
+        product_slug = create_product.slug
+
+        id_response = client.get(f"/api/products/{product_id}/")
+        slug_response = client.get(f"/api/products/{product_slug}/")
+
+        assert id_response.status_code == status.HTTP_200_OK
+        assert slug_response.status_code == status.HTTP_200_OK
+
+        assert id_response.data == slug_response.data
 
 
 @pytest.mark.django_db
@@ -29,21 +52,26 @@ class TestCreateProduct:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_if_data_is_invalid_returns_400(self, admin_api_client):
-        test_product = {"title": "test", "unit_price": "10.00", "collection_id": 1}
-        response = admin_api_client.post("/api/products/", test_product)
+        payload = {"title": "test", "unit_price": "abc", "collection_id": 1}
+        response = admin_api_client.post("/api/products/", payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_if_data_is_valid_returns_201(self, create_collection, admin_api_client):
         collection_id = create_collection.id
-        test_product = {
+        payload = {
             "title": "test",
             "unit_price": "10.00",
             "collection_id": collection_id,
         }
-        response = admin_api_client.post("/api/products/", test_product)
+
+        response = admin_api_client.post("/api/products/", payload)
+        result = response.data
 
         assert response.status_code == status.HTTP_201_CREATED
+        assert result["title"] == payload["title"]
+        assert result["unit_price"] == payload["unit_price"]
+        assert result["collection"]["id"] == payload["collection_id"]
 
 
 @pytest.mark.django_db
@@ -60,8 +88,9 @@ class TestUpdateProduct:
 
     def test_if_data_is_invalid_returns_400(self, create_product, admin_api_client):
         product_id = create_product.id
-        test_product = {"title": "test", "unit_price": "10.00", "collection_id": 1}
-        response = admin_api_client.put(f"/api/products/{product_id}/", test_product)
+        payload = {"title": "test", "unit_price": "abc", "collection_id": 1}
+
+        response = admin_api_client.put(f"/api/products/{product_id}/", payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -70,14 +99,70 @@ class TestUpdateProduct:
     ):
         product_id = create_product.id
         collection_id = create_collection.id
-        test_product = {
+        payload = {
             "title": "test",
             "unit_price": "20.00",
             "collection_id": collection_id,
         }
-        response = admin_api_client.put(f"/api/products/{product_id}/", test_product)
+
+        response = admin_api_client.put(f"/api/products/{product_id}/", payload)
+        result = response.data
 
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["title"] == test_product["title"]
-        assert response.data["unit_price"] == test_product["unit_price"]
-        assert response.data["collection"]["id"] == test_product["collection_id"]
+        assert result["title"] == payload["title"]
+        assert result["unit_price"] == payload["unit_price"]
+        assert result["collection"]["id"] == payload["collection_id"]
+
+
+@pytest.mark.django_db
+class TestPartialUpdateProduct:
+    def test_if_user_is_anonymous_returns_401(self, client):
+        response = client.patch("/api/products/1/", {})
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, authenticated_api_client):
+        response = authenticated_api_client.patch("/api/products/1/", {})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_data_is_invalid_returns_400(self, create_product, admin_api_client):
+        product_id = create_product.id
+        payload = {"unit_price": "abc"}
+
+        response = admin_api_client.patch(f"/api/products/{product_id}/", payload)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_data_is_valid_returns_200(
+        self, create_product, create_collection, admin_api_client
+    ):
+        product_id = create_product.id
+        payload = {
+            "title": "test",
+        }
+
+        response = admin_api_client.patch(f"/api/products/{product_id}/", payload)
+        result = response.data
+
+        assert response.status_code == status.HTTP_200_OK
+        assert result["title"] == payload["title"]
+
+
+@pytest.mark.django_db
+class TestDeleteProduct:
+    def test_if_user_is_anonymous_returns_401(self, client):
+        response = client.delete("/api/products/1/")
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_not_admin_returns_403(self, authenticated_api_client):
+        response = authenticated_api_client.delete("/api/products/1/")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_data_is_valid_returns_204(self, create_product, admin_api_client):
+        product_id = create_product.id
+        response = admin_api_client.delete(f"/api/products/{product_id}/")
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
