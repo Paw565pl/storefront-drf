@@ -1,10 +1,7 @@
 from decimal import Decimal
-from io import BytesIO
 
-from PIL import Image
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import (
     MinValueValidator,
     MaxValueValidator,
@@ -14,6 +11,7 @@ from django.core.validators import (
 from django.db import models
 from django_extensions.db import fields as extension_fields
 from file_validator.models import FileSizeValidator
+from imagekit.models import ProcessedImageField
 
 from likes.models import LikeDislike
 
@@ -48,28 +46,12 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    image = models.ImageField(
+    image = ProcessedImageField(
         upload_to="products/images",
+        format="webp",
+        options={"quality": 75},
         validators=[FileSizeValidator(max_upload_file_size=5242880)],  # 5 MB
     )
-
-    def save(self, *args, **kwargs):
-        image = Image.open(self.image)
-
-        output_io = BytesIO()
-        image.save(output_io, format=image.format, quality=75)
-
-        file = InMemoryUploadedFile(
-            output_io,
-            None,
-            self.image.name,
-            "image/jpeg",
-            output_io.getbuffer().nbytes,
-            None,
-        )
-        self.image.save(self.image.name, file, save=False)
-
-        super().save(*args, **kwargs)
 
 
 class Collection(models.Model):
