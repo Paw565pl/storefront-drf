@@ -6,8 +6,6 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import ModelViewSet
 
 from core.exceptions import Conflict
-from likes.models import LikeDislike
-from likes.views import LikeDislikeView
 from products.filters import ProductFilter, ReviewFilter
 from products.mixins import MultipleFieldLookupMixin
 from products.models import Product, ProductImage, Review, Collection
@@ -19,6 +17,8 @@ from products.serializers import (
     CollectionSerializer,
 )
 from products.utils import get_product_or_404
+from votes.models import Vote
+from votes.views import VoteView
 
 
 # Create your views here.
@@ -47,14 +47,10 @@ class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
         Product.objects.select_related("collection")
         .prefetch_related("promotions")
         .prefetch_related("productimage_set")
-        .prefetch_related("likes_dislikes")
+        .prefetch_related("votes")
         .annotate(
-            likes_count=Count(
-                "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
-            ),
-            dislikes_count=Count(
-                "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
-            ),
+            likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
+            dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
         )
         .order_by("title")
         .all()
@@ -106,14 +102,10 @@ class ProductReviewViewSet(ModelViewSet):
 
         return (
             Review.objects.filter(product=product)
-            .prefetch_related("likes_dislikes")
+            .prefetch_related("votes")
             .annotate(
-                likes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
-                ),
-                dislikes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
-                ),
+                likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
+                dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
             )
             .order_by("-created_at")
             .all()
@@ -125,9 +117,9 @@ class ProductReviewViewSet(ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class ProductLikeDislikeView(LikeDislikeView):
+class ProductVoteView(VoteView):
     content_object_queryset = Product.objects.all()
-    integrity_error_message = "You have already liked or disliked this product."
+    integrity_error_message = "You have already voted on this product."
 
     def get_content_object_id(self, *args, **kwargs):
         product_identifier = self.kwargs["product_pk"]
@@ -135,6 +127,6 @@ class ProductLikeDislikeView(LikeDislikeView):
         return product.id
 
 
-class ProductReviewLikeDislikeView(LikeDislikeView):
+class ProductReviewVoteView(VoteView):
     content_object_queryset = Review.objects.all()
-    integrity_error_message = "You have already liked or disliked this review."
+    integrity_error_message = "You have already voted on this review."

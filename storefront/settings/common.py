@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "imagekit",
     "djoser",
     "core",
-    "likes",
+    "votes",
     "products",
     "django_cleanup.apps.CleanupConfig",
 ]

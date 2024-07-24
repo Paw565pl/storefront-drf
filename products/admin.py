@@ -8,8 +8,8 @@ from django.utils.html import format_html
 from django.utils.http import urlencode
 from django_admin_inline_paginator.admin import TabularInlinePaginated
 
-from likes.models import LikeDislike
 from products.models import Product, ProductImage, Collection, Review, Promotion
+from votes.models import Vote
 
 
 # Register your models here.
@@ -85,11 +85,9 @@ class ProductAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .annotate(
-                likes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
-                ),
+                likes_count=Count("votes", filter=Q(likes_dislikes__vote=Vote.LIKE)),
                 dislikes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+                    "votes", filter=Q(likes_dislikes__vote=Vote.DISLIKE)
                 ),
             )
         )
@@ -178,11 +176,9 @@ class ReviewAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .annotate(
-                likes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.LIKE)
-                ),
+                likes_count=Count("votes", filter=Q(likes_dislikes__vote=Vote.LIKE)),
                 dislikes_count=Count(
-                    "likes_dislikes", filter=Q(likes_dislikes__vote=LikeDislike.DISLIKE)
+                    "votes", filter=Q(likes_dislikes__vote=Vote.DISLIKE)
                 ),
             )
         )
