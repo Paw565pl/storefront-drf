@@ -27,6 +27,7 @@ django-admin-inline-paginator = "^0.4.0"
 file-validator = "^1.0.9"
 django-imagekit = "^5.0.0"
 django-cleanup = "^8.1.0"
+django-phonenumber-field = {extras = ["phonenumbers"], version = "^8.0.0"}
 
 
 [tool.poetry.group.dev.dependencies]
