@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "core",
     "votes",
     "products",
+    "orders",
     "django_cleanup.apps.CleanupConfig",
 ]
 
