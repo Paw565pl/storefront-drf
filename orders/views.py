@@ -1,3 +1,5 @@
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.generics import get_object_or_404, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -5,10 +7,14 @@ from rest_framework.mixins import (
     DestroyModelMixin,
 )
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from orders.models import CustomerAddress, Cart
-from orders.serializers import CustomerAddressSerializer, CartSerializer
+from orders.models import CustomerAddress, Cart, CartItem
+from orders.serializers import (
+    CustomerAddressSerializer,
+    CartSerializer,
+    CartItemSerializer,
+)
 
 
 # Create your views here.
@@ -33,3 +39,25 @@ class CartViewSet(
 ):
     queryset = Cart.objects.prefetch_related("cartitem_set__product").all()
     serializer_class = CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+    http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        return (
+            CartItem.objects.filter(cart_id=self.kwargs["cart_pk"])
+            .select_related("product")
+            .order_by("id")
+            .all()
+        )
+
+    @extend_schema(
+        request=inline_serializer(
+            "CartItemUpdatePayload",
+            fields={"quantity": serializers.IntegerField(min_value=1)},
+        )
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
