@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from orders.models import Customer, CustomerAddress, CartItem
+from orders.models import Customer, CustomerAddress, CartItem, Cart
 from products.models import Product
 from products.serializers import SimpleProductSerializer
 
@@ -53,3 +53,14 @@ class CartItemSerializer(serializers.ModelSerializer):
         if not Product.objects.filter(id=product_id).exists():
             raise serializers.ValidationError("Invalid product id.")
         return product_id
+
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ["id", "items", "total_price"]
+
+    items = CartItemSerializer(many=True, read_only=True, source="cartitem_set")
+    total_price = serializers.DecimalField(
+        read_only=True, max_digits=10, decimal_places=2
+    )
