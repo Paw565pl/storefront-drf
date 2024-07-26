@@ -44,6 +44,40 @@ class Customer(models.Model):
         return self.user.username  # noqa
 
 
+class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    created_at = extension_fields.CreationDateTimeField()
+    modified_at = extension_fields.ModificationDateTimeField()
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(Decimal(0))],
+    )
+
+    def __str__(self) -> str:
+        return f"Cart {self.id}"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cart", "product"], name="one_product_per_cart"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.product.title} - quantity {self.quantity}"
+
+
 class OrderAddress(Address):
     pass
 
@@ -82,9 +116,6 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
-    )
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
     )
@@ -93,40 +124,6 @@ class OrderItem(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["order", "product"], name="one_product_per_order"
-            ),
-        ]
-
-    def __str__(self) -> str:
-        return f"{self.product.title} - quantity {self.quantity}"
-
-
-class Cart(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    created_at = extension_fields.CreationDateTimeField()
-    modified_at = extension_fields.ModificationDateTimeField()
-    total_price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
-    )
-
-    def __str__(self) -> str:
-        return f"Cart {self.id}"
-
-
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
-    )
-    total_price = models.DecimalField(
-        max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["cart", "product"], name="one_product_per_cart"
             ),
         ]
 
