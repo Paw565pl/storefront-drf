@@ -16,6 +16,7 @@ class VoteView(RetrieveUpdateDestroyAPIView):
     content_object_queryset: QuerySet | None = None
     integrity_error_message: str | None = None
 
+    http_method_names = ["get", "post", "put", "delete", "head", "options", "trace"]
     queryset = Vote.objects.all()
     serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated]
@@ -54,6 +55,7 @@ class VoteView(RetrieveUpdateDestroyAPIView):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # TODO: add success headers
 
         try:
             self.get_queryset().create(
