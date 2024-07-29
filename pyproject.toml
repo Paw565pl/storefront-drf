@@ -50,6 +50,12 @@ command_line = "-m pytest"
 [tool.coverage.report]
 format = "markdown"
 
+[tool.poe.tasks]
+test = "pytest"
+
+[tool.poe.tasks.coverage]
+shell = "coverage run && coverage html"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
