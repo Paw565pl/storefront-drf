@@ -50,11 +50,11 @@ command_line = "-m pytest"
 [tool.coverage.report]
 format = "markdown"
 
-[tool.poe.tasks]
-test = "pytest"
-
 [tool.poe.tasks.coverage]
 shell = "coverage run && coverage html"
+
+[tool.poe.tasks."coverage:clean"]
+shell = "rm -rf htmlcov/ .coverage "
 
 [build-system]
 requires = ["poetry-core"]
