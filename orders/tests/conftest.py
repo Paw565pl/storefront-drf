@@ -1,7 +1,7 @@
 import pytest
 from model_bakery import baker
 
-from orders.models import CustomerAddress, Customer
+from orders.models import CustomerAddress, Customer, Cart
 
 
 @pytest.fixture
@@ -13,3 +13,9 @@ def create_customer_address():
         return customer_address
 
     return go
+
+
+@pytest.fixture
+def cart() -> Cart:
+    cart = baker.make(Cart)
+    return cart
