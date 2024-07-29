@@ -42,3 +42,4 @@ class TestDeleteCart:
         response = api_client.delete(URL + f"{cart_id}/")
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Cart.objects.filter(id=cart_id).exists()

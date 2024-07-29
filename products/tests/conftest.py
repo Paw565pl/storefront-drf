@@ -1,3 +1,5 @@
+from shutil import rmtree
+
 import pytest
 from model_bakery import baker
 
@@ -5,26 +7,32 @@ from products.models import Collection, Product, ProductImage, Review
 
 
 @pytest.fixture
-def create_collection():
+def collection() -> Collection:
     collection = baker.make(Collection)
     return collection
 
 
 @pytest.fixture
-def create_product(create_collection):
-    product = baker.make(Product, collection=create_collection)
+def product(collection) -> Product:
+    product = baker.make(Product, collection=collection)
     return product
 
 
 @pytest.fixture
-def create_product_image(create_product, create_image_file):
+def product_image(product, create_image_file) -> ProductImage:
     file = create_image_file()
 
-    image = baker.make(ProductImage, product=create_product, image=file)
+    image = baker.make(ProductImage, product=product, image=file)
     return image
 
 
 @pytest.fixture
-def create_product_review(create_product):
-    review = baker.make(Review, product=create_product)
+def product_review(product) -> Review:
+    review = baker.make(Review, product=product)
     return review
+
+
+@pytest.fixture(scope="session", autouse=True)
+def remove_mock_images():
+    yield remove_mock_images
+    rmtree("media/products/images")

@@ -56,14 +56,7 @@ class TestCreateCustomerAddress:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_if_data_is_valid_returns_201(self, authenticated_api_client):
-        response = authenticated_api_client.post(URL, VALID_DATA)
-
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.data["first_name"] == VALID_DATA["first_name"]
-        assert response.data["last_name"] == VALID_DATA["last_name"]
-
-    def test_if_address_already_exists_returns(
+    def test_if_address_already_exists_returns_400(
         self, api_client, test_user, create_customer_address
     ):
         create_customer_address(test_user.customer)
@@ -72,6 +65,14 @@ class TestCreateCustomerAddress:
         response = api_client.post(URL, VALID_DATA)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_data_is_valid_returns_201(self, authenticated_api_client):
+        response = authenticated_api_client.post(URL, VALID_DATA)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["first_name"] == VALID_DATA["first_name"]
+        assert response.data["last_name"] == VALID_DATA["last_name"]
+        assert CustomerAddress.objects.filter(**VALID_DATA).exists()
 
 
 @pytest.mark.django_db
@@ -108,6 +109,7 @@ class TestUpdateCustomerAddress:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data["first_name"] == payload["first_name"]
+        assert CustomerAddress.objects.filter(**payload).exists()
 
 
 @pytest.mark.django_db
@@ -144,6 +146,7 @@ class TestPartialUpdateCustomerAddress:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data["first_name"] == payload["first_name"]
+        assert CustomerAddress.objects.filter(**payload).exists()
 
 
 @pytest.mark.django_db
