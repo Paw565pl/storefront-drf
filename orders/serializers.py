@@ -107,3 +107,15 @@ class CartSerializer(serializers.ModelSerializer):
     total_price = serializers.DecimalField(
         read_only=True, max_digits=10, decimal_places=2
     )
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["id", "product", "quantity", "total_price"]
+        extra_kwargs = {
+            "quantity": {"read_only": True},
+            "total_price": {"read_only": True},
+        }
+
+    product = SimpleProductSerializer(read_only=True)
