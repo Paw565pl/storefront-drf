@@ -46,12 +46,20 @@ class CartItemViewSet(ModelViewSet):
     serializer_class = CartItemSerializer
 
     def get_queryset(self):
+        cart_id = self.kwargs["cart_pk"]
+        cart = get_object_or_404(Cart, id=cart_id)
+
         return (
-            CartItem.objects.filter(cart_id=self.kwargs["cart_pk"])
+            CartItem.objects.filter(cart_id=cart)
             .select_related("product")
             .order_by("id")
             .all()
         )
+
+    def create(self, request, *args, **kwargs):
+        cart_id = self.kwargs["cart_pk"]
+        get_object_or_404(Cart, id=cart_id)
+        return super().create(request, *args, **kwargs)
 
     @extend_schema(
         request=inline_serializer(
