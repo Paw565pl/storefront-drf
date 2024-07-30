@@ -26,7 +26,7 @@ class Product(models.Model):
     unit_price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
     )
-    inventory = models.IntegerField(default=0)
+    inventory = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     last_update = extension_fields.ModificationDateTimeField()
     collection = models.ForeignKey("Collection", on_delete=models.PROTECT)
     promotions = models.ManyToManyField("Promotion", blank=True)
@@ -52,6 +52,9 @@ class ProductImage(models.Model):
         options={"quality": 75},
         validators=[FileSizeValidator(max_upload_file_size=5242880)],  # 5 MB
     )
+
+    def __str__(self) -> str:
+        return f"Image nr {self.id} of {self.product.title}"
 
 
 class Collection(models.Model):
@@ -102,4 +105,4 @@ class Review(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Review {self.id}"
+        return f"Review nr {self.id} for {self.product.title}"
