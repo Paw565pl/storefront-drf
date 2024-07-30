@@ -3,19 +3,7 @@ from shutil import rmtree
 import pytest
 from model_bakery import baker
 
-from products.models import Collection, Product, ProductImage, Review
-
-
-@pytest.fixture
-def collection() -> Collection:
-    collection = baker.make(Collection)
-    return collection
-
-
-@pytest.fixture
-def product(collection) -> Product:
-    product = baker.make(Product, collection=collection)
-    return product
+from products.models import ProductImage, Review
 
 
 @pytest.fixture

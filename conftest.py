@@ -3,6 +3,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from model_bakery import baker
 from rest_framework.test import APIClient
 
+from products.models import Product, Collection
+
 
 @pytest.fixture
 def api_client() -> APIClient:
@@ -40,3 +42,15 @@ def create_image_file():
         return file
 
     return do_create_image_file
+
+
+@pytest.fixture
+def collection() -> Collection:
+    collection = baker.make(Collection)
+    return collection
+
+
+@pytest.fixture
+def product(collection) -> Product:
+    product = baker.make(Product, collection=collection, inventory=10)
+    return product
