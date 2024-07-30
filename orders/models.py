@@ -46,7 +46,6 @@ class Customer(models.Model):
 
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    created_at = extension_fields.CreationDateTimeField()
     modified_at = extension_fields.ModificationDateTimeField()
     total_price = models.DecimalField(
         max_digits=10,
