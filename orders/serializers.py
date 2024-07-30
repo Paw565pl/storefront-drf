@@ -72,7 +72,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         try:
             # update existing cart item quantity and total_price
             cart_item = CartItem.objects.get(cart_id=cart_id, product_id=product_id)
-            cart_item.quantity = quantity
+            cart_item.quantity += quantity
             cart_item.total_price = quantity * cart_item.product.unit_price
             cart_item.save()
 
@@ -84,9 +84,11 @@ class CartItemSerializer(serializers.ModelSerializer):
             )
 
     def update(self, instance: CartItem, validated_data):
-        quantity = self.validated_data["quantity"]
-        product = instance.product
+        quantity = self.validated_data.get("quantity")
+        if quantity is None:
+            raise serializers.ValidationError({"quantity": ["This field is required."]})
 
+        product = instance.product
         self.validate_quantity_in_stock(quantity, product)
 
         instance.quantity = quantity
