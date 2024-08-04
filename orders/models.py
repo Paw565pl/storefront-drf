@@ -46,7 +46,7 @@ class Customer(models.Model):
 
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    modified_at = extension_fields.ModificationDateTimeField()
+    updated_at = extension_fields.ModificationDateTimeField()
     total_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -97,7 +97,8 @@ class Order(models.Model):
     status = models.CharField(
         max_length=1, choices=STATUS_CHOICES, default=STATUS_IN_PROGRESS
     )
-    placed_at = extension_fields.CreationDateTimeField()
+    created_at = extension_fields.CreationDateTimeField()
+    updated_at = extension_fields.ModificationDateTimeField()
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal(0))]
     )
