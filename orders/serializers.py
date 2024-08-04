@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from orders.models import Customer, CustomerAddress, CartItem, Cart
+    OrderAddress,
 from products.models import Product
 from products.serializers import SimpleProductSerializer
 
@@ -123,10 +124,22 @@ class CartSerializer(serializers.ModelSerializer):
 
     items = CartItemSerializer(read_only=True, many=True, source="cartitem_set")
 
-    items = CartItemSerializer(many=True, read_only=True, source="cartitem_set")
-    total_price = serializers.DecimalField(
-        read_only=True, max_digits=10, decimal_places=2
-    )
+
+class OrderAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderAddress
+        fields = [
+            "first_name",
+            "last_name",
+            "phone_number",
+            "apartment_number",
+            "street_number",
+            "street",
+            "postal_code",
+            "city",
+            "state",
+            "country",
+        ]
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
