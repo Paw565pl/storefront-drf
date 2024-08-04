@@ -39,19 +39,10 @@ class CustomerAddressSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ["id", "product_id", "product", "quantity", "total_price"]
+        fields = ["id", "product", "quantity", "total_price"]
+        read_only_fields = ["quantity", "total_price"]
 
-    product_id = serializers.IntegerField(write_only=True)
     product = SimpleProductSerializer(read_only=True)
-    total_price = serializers.DecimalField(
-        read_only=True, max_digits=10, decimal_places=2
-    )
-
-    @staticmethod
-    def validate_product_id(product_id: int):
-        if not Product.objects.filter(id=product_id).exists():
-            raise serializers.ValidationError("Invalid product id.")
-        return product_id
 
     @staticmethod
     def validate_quantity_in_stock(quantity: int, product: Product):
@@ -60,11 +51,25 @@ class CartItemSerializer(serializers.ModelSerializer):
                 "You cannot add more to your cart than is available in stock."
             )
 
+
+class CreateCartItemSerializer(CartItemSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["product_id", "quantity"]
+
+    product_id = serializers.IntegerField(write_only=True)
+
+    @staticmethod
+    def validate_product_id(product_id: int):
+        if not Product.objects.filter(id=product_id).exists():
+            raise serializers.ValidationError("Invalid product id.")
+        return product_id
+
     def create(self, validated_data):
         cart_id = self.context["view"].kwargs["cart_pk"]
-        quantity = self.validated_data["quantity"]
+        quantity = validated_data["quantity"]
 
-        product_id = self.validated_data["product_id"]
+        product_id = validated_data["product_id"]
         product = Product.objects.only("unit_price", "inventory").get(id=product_id)
 
         self.validate_quantity_in_stock(quantity, product)
@@ -83,8 +88,17 @@ class CartItemSerializer(serializers.ModelSerializer):
                 cart_id=cart_id, total_price=total_price, **self.validated_data
             )
 
+    def to_representation(self, instance: CartItem):
+        return CartItemSerializer(context=self.context).to_representation(instance)
+
+
+class UpdateCartItemSerializer(CartItemSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["quantity"]
+
     def update(self, instance: CartItem, validated_data):
-        quantity = self.validated_data.get("quantity")
+        quantity = validated_data.get("quantity")
         if quantity is None:
             raise serializers.ValidationError({"quantity": ["This field is required."]})
 
@@ -97,11 +111,17 @@ class CartItemSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def to_representation(self, instance: CartItem):
+        return CartItemSerializer(context=self.context).to_representation(instance)
+
 
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ["id", "items", "total_price"]
+        read_only_fields = ["total_price"]
+
+    items = CartItemSerializer(read_only=True, many=True, source="cartitem_set")
 
     items = CartItemSerializer(many=True, read_only=True, source="cartitem_set")
     total_price = serializers.DecimalField(
