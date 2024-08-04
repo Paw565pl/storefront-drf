@@ -1,7 +1,13 @@
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from orders.models import Customer, CustomerAddress, CartItem, Cart
+from orders.models import (
+    Customer,
+    CustomerAddress,
+    CartItem,
+    Cart,
+    Order,
     OrderAddress,
     OrderItem,
 )
@@ -151,3 +157,111 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["quantity", "total_price"]
 
     product = SimpleProductSerializer(read_only=True)
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "items",
+            "address",
+            "status",
+            "created_at",
+            "updated_at",
+            "total_price",
+        ]
+        read_only_fields = ["total_price"]
+
+    items = OrderItemSerializer(read_only=True, many=True, source="orderitem_set")
+    address = OrderAddressSerializer(read_only=True)
+    status = serializers.CharField(read_only=True, source="get_status_display")
+
+
+class CreateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["cart_id"]
+
+    cart_id = serializers.UUIDField(write_only=True)
+
+    @staticmethod
+    def validate_cart_id(cart_id):
+        if not Cart.objects.filter(id=cart_id).exists():
+            raise serializers.ValidationError("No cart with the given id was found.")
+        if CartItem.objects.filter(cart_id=cart_id).count() == 0:
+            raise serializers.ValidationError("The cart is empty.")
+        return cart_id
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            user = self.context["request"].user
+            customer = (
+                Customer.objects.only("address")
+                .select_related("address")
+                .get(user=user)
+            )
+
+            if not customer.address:
+                raise serializers.ValidationError("Customer has no address.")
+
+            cart_id = validated_data["cart_id"]
+            cart = Cart.objects.prefetch_related("cartitem_set__product").get(
+                id=cart_id
+            )
+            cart_items = cart.cartitem_set.all()
+
+            serialized_customer_address = CustomerAddressSerializer(
+                customer.address
+            ).data
+            order_address, _ = OrderAddress.objects.get_or_create(
+                **serialized_customer_address
+            )
+
+            order = Order.objects.create(
+                customer=customer, address=order_address, total_price=cart.total_price
+            )
+
+            products = []
+            order_items = []
+            for item in cart_items:
+                item.product.inventory -= item.quantity
+                products.append(item.product)
+
+                order_items.append(
+                    OrderItem(
+                        order=order,
+                        product=item.product,
+                        quantity=item.quantity,
+                        total_price=item.total_price,
+                    )
+                )
+
+            Product.objects.bulk_update(products, ["inventory"])
+            OrderItem.objects.bulk_create(order_items)
+
+            cart.delete()
+
+            return order
+
+    def to_representation(self, instance: Order):
+        return OrderSerializer(context=self.context).to_representation(instance)
+
+
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["status"]
+
+    def update(self, instance: Order, validated_data):
+        status = validated_data.get("status")
+        if status is None:
+            raise serializers.ValidationError({"status": ["This field is required."]})
+
+        instance.status = status
+        instance.save()
+
+        return instance
+
+    def to_representation(self, instance: Order):
+        return OrderSerializer(context=self.context).to_representation(instance)
