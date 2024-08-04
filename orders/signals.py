@@ -14,11 +14,20 @@ def create_customer_for_new_user(sender, instance, created: bool, **kwargs):
 
 @receiver([post_save, post_delete], sender=CartItem)
 def update_cart_total_price(sender, instance: CartItem, **kwargs):
-    cart_id = instance.cart_id
-    new_total_price = (
-        CartItem.objects.filter(cart_id=cart_id)
-        .aggregate(Sum("total_price"))
-        .get("total_price__sum")
-        or 0
-    )
-    Cart.objects.filter(id=cart_id).update(total_price=new_total_price)
+    def do_update_cart_total_price():
+        cart_id = instance.cart_id
+        new_total_price = (
+            CartItem.objects.filter(cart_id=cart_id)
+            .aggregate(Sum("total_price"))
+            .get("total_price__sum")
+            or 0
+        )
+        Cart.objects.filter(id=cart_id).update(total_price=new_total_price)
+
+    origin = kwargs.get("origin")
+    if origin is None:  # update total price if signal is post_save
+        do_update_cart_total_price()
+    elif isinstance(
+        origin, CartItem
+    ):  # update total price if delete origin is CartItem
+        do_update_cart_total_price()
