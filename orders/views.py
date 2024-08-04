@@ -1,5 +1,3 @@
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
 from rest_framework.generics import get_object_or_404, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -48,7 +46,6 @@ class CartViewSet(
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
-    serializer_class = CartItemSerializer
 
     def get_queryset(self):
         cart_id = self.kwargs["cart_pk"]
