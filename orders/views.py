@@ -14,6 +14,8 @@ from orders.serializers import (
     CustomerAddressSerializer,
     CartSerializer,
     CartItemSerializer,
+    UpdateCartItemSerializer,
+    CreateCartItemSerializer,
 )
 
 
@@ -53,8 +55,15 @@ class CartItemViewSet(ModelViewSet):
             CartItem.objects.filter(cart_id=cart)
             .select_related("product")
             .order_by("id")
-            .all()
         )
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateCartItemSerializer
+        elif self.action == "partial_update":
+            return UpdateCartItemSerializer
+        else:
+            return CartItemSerializer
 
     def create(self, request, *args, **kwargs):
         cart_id = self.kwargs["cart_pk"]
