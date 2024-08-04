@@ -3,6 +3,8 @@ from rest_framework.generics import get_object_or_404
 
 from orders.models import Customer, CustomerAddress, CartItem, Cart
     OrderAddress,
+    OrderItem,
+)
 from products.models import Product
 from products.serializers import SimpleProductSerializer
 
@@ -144,11 +146,8 @@ class OrderAddressSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CartItem
+        model = OrderItem
         fields = ["id", "product", "quantity", "total_price"]
-        extra_kwargs = {
-            "quantity": {"read_only": True},
-            "total_price": {"read_only": True},
-        }
+        read_only_fields = ["quantity", "total_price"]
 
     product = SimpleProductSerializer(read_only=True)
