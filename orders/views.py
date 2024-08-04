@@ -6,16 +6,19 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     DestroyModelMixin,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from orders.models import CustomerAddress, Cart, CartItem
+from orders.models import CustomerAddress, Cart, CartItem, Order, Customer
 from orders.serializers import (
     CustomerAddressSerializer,
     CartSerializer,
     CartItemSerializer,
+    OrderSerializer,
     UpdateCartItemSerializer,
     CreateCartItemSerializer,
+    CreateOrderSerializer,
+    UpdateOrderSerializer,
 )
 
 
@@ -70,11 +73,33 @@ class CartItemViewSet(ModelViewSet):
         get_object_or_404(Cart, id=cart_id)
         return super().create(request, *args, **kwargs)
 
-    @extend_schema(
-        request=inline_serializer(
-            "CartItemUpdatePayload",
-            fields={"quantity": serializers.IntegerField(min_value=1)},
+
+class OrderViewSet(ModelViewSet):
+    http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+
+    def get_queryset(self):
+        queryset = (
+            Order.objects.select_related("address")
+            .prefetch_related("orderitem_set__product")
+            .order_by("id")
         )
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+
+        user = self.request.user
+        if user.is_staff:
+            return queryset
+
+        customer_id = Customer.objects.only("id").get(user_id=user.id)
+        return queryset.filter(customer_id=customer_id)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateOrderSerializer
+        elif self.action == "partial_update":
+            return UpdateOrderSerializer
+        else:
+            return OrderSerializer
+
+    def get_permissions(self):
+        if self.action in ["partial_update", "destroy"]:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
