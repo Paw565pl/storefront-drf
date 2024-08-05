@@ -1,5 +1,3 @@
-from os import environ
-
 from .common import *  # noqa
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -14,7 +12,7 @@ DATABASES = {
         "NAME": "storefront",
         "USER": "postgres",
         "PASSWORD": "mysecretpassword",
-        "HOST": environ.get("DB_HOST", "localhost"),
+        "HOST": "database",
         "PORT": "5432",
     }
 }
