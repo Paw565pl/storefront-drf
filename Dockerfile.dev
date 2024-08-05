@@ -1,0 +1,21 @@
+FROM python:3.12-alpine
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONUNBUFFERED=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_NO_INTERACTION=1 \
+  POETRY_HOME='/usr/local' \
+  POETRY_VERSION=1.8.3
+
+WORKDIR /app
+
+RUN apk add curl gcc python3-dev musl-dev linux-headers
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+COPY poetry.lock pyproject.toml ./
+
+RUN poetry install --all-extras --compile --no-root
+
+COPY . .
+
+CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
