@@ -27,14 +27,12 @@ class CustomerAdmin(admin.ModelAdmin):
 
 class CartItemInline(TabularInlinePaginated):
     model = CartItem
-    readonly_fields = ["product", "quantity", "total_price"]
+    autocomplete_fields = ["product"]
+    readonly_fields = ["total_price"]
     per_page = 10
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("product")
-
-    def has_add_permission(self, *args, **kwargs):
-        return False
 
 
 @admin.register(Cart)
@@ -47,14 +45,12 @@ class CartAdmin(admin.ModelAdmin):
 
 class OrderItemInline(TabularInlinePaginated):
     model = OrderItem
-    readonly_fields = ["product", "quantity", "total_price"]
+    autocomplete_fields = ["product"]
+    readonly_fields = ["total_price"]
     per_page = 10
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("product")
-
-    def has_add_permission(self, *args, **kwargs):
-        return False
 
 
 @admin.register(Order)
