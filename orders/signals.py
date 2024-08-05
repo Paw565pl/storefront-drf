@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db.models import Sum
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 
 from orders.models import Customer, CartItem, Cart, OrderItem, Order
@@ -10,6 +10,12 @@ from orders.models import Customer, CartItem, Cart, OrderItem, Order
 def create_customer_for_new_user(sender, instance, created: bool, **kwargs):
     if created:
         Customer.objects.create(user=instance)
+
+
+@receiver([pre_save], sender=CartItem)
+@receiver([pre_save], sender=OrderItem)
+def calculate_item_total_price(sender, instance: CartItem | OrderItem, **kwargs):
+    instance.total_price = instance.quantity * instance.product.unit_price
 
 
 @receiver([post_save, post_delete], sender=CartItem)
