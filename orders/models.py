@@ -37,7 +37,7 @@ class CustomerAddress(Address):
 class Customer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     address = models.ForeignKey(
-        CustomerAddress, on_delete=models.SET_NULL, null=True, blank=True
+        CustomerAddress, on_delete=models.PROTECT, null=True, blank=True
     )
 
     def __str__(self) -> str:
