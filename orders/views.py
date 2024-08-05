@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -5,6 +6,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from orders.models import CustomerAddress, Cart, CartItem, Order, Customer
@@ -35,6 +37,19 @@ class CustomerAddressView(CreateModelMixin, RetrieveUpdateDestroyAPIView):
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user_id = self.request.user.id
+        customer = Customer.objects.get(user_id=user_id)
+        address: CustomerAddress = self.get_object()
+
+        customer.address = None
+        customer.save()
+
+        if address.customer_set.count() == 0:
+            address.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CartViewSet(

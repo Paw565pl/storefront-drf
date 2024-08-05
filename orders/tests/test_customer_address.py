@@ -161,6 +161,22 @@ class TestDeleteCustomerAddress:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    def test_if_other_customer_has_address_returns_204(
+        self, api_client, test_user, django_user_model, create_customer_address
+    ):
+        customer_address = create_customer_address(test_user.customer)
+
+        other_user = django_user_model.objects.create()
+        other_user.customer.address = customer_address
+        other_user.customer.save()
+
+        api_client.force_authenticate(user=test_user)
+
+        response = api_client.delete(URL)
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert CustomerAddress.objects.filter(id=customer_address.id).exists()
+
     def test_if_delete_returns_204(
         self, api_client, test_user, create_customer_address
     ):
