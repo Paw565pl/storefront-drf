@@ -9,8 +9,10 @@
 .taskcluster.yml
 
 # Docker
-docker-compose.yml
-Dockerfile.sus
+docker-compose.dev.yml
+docker-compose.prod.yml
+Dockerfile.dev
+Dockerfile.prod
 .docker
 .dockerignore
 
