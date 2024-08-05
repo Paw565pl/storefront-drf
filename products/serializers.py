@@ -95,29 +95,17 @@ class ProductSerializer(serializers.ModelSerializer):
     collection_id = serializers.IntegerField(write_only=True)
 
     images = ProductImageSerializer(
-        source="productimage_set", many=True, read_only=True
+        read_only=True, many=True, source="productimage_set"
     )
-    promotions = PromotionSerializer(many=True, read_only=True)
+    promotions = PromotionSerializer(read_only=True, many=True)
 
-    def create(self, validated_data):
-        collection_id = validated_data.get("collection_id")
-        collection_exists = Collection.objects.filter(id=collection_id).exists()
-
-        if not collection_exists:
-            raise serializers.ValidationError("Collection does not exist.")
-
-        return super().create(validated_data)
-
-    def update(self, instance: Product, validated_data):
-        collection_id = validated_data.get("collection_id")
-
-        if collection_id is not None:
-            collection_exists = Collection.objects.filter(id=collection_id).exists()
-
-            if not collection_exists:
-                raise serializers.ValidationError("Collection does not exist.")
-
-        return super().update(instance, validated_data)
+    @staticmethod
+    def validate_collection_id(collection_id: int):
+        if not Collection.objects.filter(id=collection_id).exists():
+            raise serializers.ValidationError(
+                "Collection with given id does not exist."
+            )
+        return collection_id
 
 
 class SimpleProductSerializer(serializers.ModelSerializer):
