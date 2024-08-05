@@ -13,9 +13,21 @@ def create_customer_for_new_user(sender, instance, created: bool, **kwargs):
 
 
 @receiver([pre_save], sender=CartItem)
-@receiver([pre_save], sender=OrderItem)
-def calculate_item_total_price(sender, instance: CartItem | OrderItem, **kwargs):
+def calculate_cart_item_total_price(sender, instance: CartItem, **kwargs):
     instance.total_price = instance.quantity * instance.product.unit_price
+
+
+@receiver([pre_save], sender=OrderItem)
+def calculate_order_item_total_price(sender, instance: OrderItem, **kwargs):
+    old_order_item: OrderItem | None = OrderItem.objects.filter(id=instance.id).first()
+    old_quantity = old_order_item.quantity if old_order_item is not None else 0
+    product = instance.product
+
+    quantity_change = instance.quantity - old_quantity
+    product.inventory -= quantity_change
+    product.save()
+
+    instance.total_price = instance.quantity * product.unit_price
 
 
 @receiver([post_save, post_delete], sender=CartItem)
