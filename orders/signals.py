@@ -51,9 +51,10 @@ def update_order_total_price(sender, instance: OrderItem, **kwargs):
         Order.objects.filter(id=order_id).update(total_price=new_total_price)
 
     origin = kwargs.get("origin")
-    if origin is None:  # update total price if signal is post_save
-        do_update_order_total_price()
-    elif isinstance(
-        origin, OrderItem
-    ):  # update total price if delete origin is CartItem
+    created = kwargs.get("created")
+
+    # update total price only if model is updated or directly deleted
+    model_update = origin is None and not created
+    direct_model_delete = isinstance(origin, OrderItem)
+    if model_update or direct_model_delete:
         do_update_order_total_price()
