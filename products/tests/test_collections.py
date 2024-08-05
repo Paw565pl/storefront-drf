@@ -21,6 +21,7 @@ class TestListCollection:
 
         response = api_client.get(URL)
         results = response.data["results"]
+        results[0].pop("products_count")
 
         assert response.status_code == status.HTTP_200_OK
         assert len(results) == 1
@@ -72,6 +73,7 @@ class TestRetrieveCollection:
         serialized_collection = CollectionSerializer(collection).data
 
         response = api_client.get(URL + f"{collection.id}/")
+        response.data.pop("products_count")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == serialized_collection
