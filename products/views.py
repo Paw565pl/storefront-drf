@@ -49,15 +49,12 @@ class CollectionViewSet(ModelViewSet):
 class ProductViewSet(MultipleFieldLookupMixin, ModelViewSet):
     queryset = (
         Product.objects.select_related("collection")
-        .prefetch_related("promotions")
-        .prefetch_related("productimage_set")
-        .prefetch_related("votes")
+        .prefetch_related("promotions", "productimage_set")
         .annotate(
             likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
             dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
         )
         .order_by("title")
-        .all()
     )
     serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -106,13 +103,12 @@ class ProductReviewViewSet(ModelViewSet):
 
         return (
             Review.objects.filter(product=product)
-            .prefetch_related("votes")
+            .select_related("author")
             .annotate(
                 likes_count=Count("votes", filter=Q(votes__value=Vote.LIKE)),
                 dislikes_count=Count("votes", filter=Q(votes__value=Vote.DISLIKE)),
             )
             .order_by("-created_at")
-            .all()
         )
 
     def create(self, request, *args, **kwargs):
