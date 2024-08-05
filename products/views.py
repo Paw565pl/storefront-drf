@@ -23,10 +23,14 @@ from votes.views import VoteView
 
 # Create your views here.
 class CollectionViewSet(ModelViewSet):
-    queryset = Collection.objects.prefetch_related("product_set").all()
+    queryset = (
+        Collection.objects.prefetch_related("product_set")
+        .annotate(products_count=Count("product"))
+        .order_by("title")
+    )
     serializer_class = CollectionSerializer
     permission_classes = [IsAdminOrReadOnly]
-    ordering_fields = ["title"]
+    ordering_fields = ["title", "products_count"]
 
     # cache responses for 10 minutes
     @method_decorator([cache_page(60 * 10), vary_on_cookie])
