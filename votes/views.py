@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from core.exceptions import Conflict
 from votes.models import Vote
@@ -28,7 +29,6 @@ class VoteView(RetrieveUpdateDestroyAPIView):
 
     def get_content_object_id(self, *args, **kwargs):
         content_object_id = self.kwargs.get("pk")
-
         if content_object_id is None:
             raise AttributeError("you must include the object pk in the url path")
 
@@ -47,6 +47,13 @@ class VoteView(RetrieveUpdateDestroyAPIView):
             user=self.request.user,
         )
 
+    @staticmethod
+    def get_success_headers(data):
+        try:
+            return {"Location": str(data[api_settings.URL_FIELD_NAME])}
+        except (TypeError, KeyError):
+            return {}
+
     def post(self, request, *args, **kwargs):
         content_object_id = self.get_content_object_id()
         content_object = get_object_or_404(
@@ -55,7 +62,6 @@ class VoteView(RetrieveUpdateDestroyAPIView):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # TODO: add success headers
 
         try:
             self.get_queryset().create(
@@ -63,7 +69,10 @@ class VoteView(RetrieveUpdateDestroyAPIView):
                 user=request.user,
                 content_object=content_object,
             )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
         except IntegrityError:
             raise Conflict(
                 self.integrity_error_message
