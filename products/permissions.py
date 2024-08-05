@@ -10,8 +10,7 @@ class IsAdminOrReadOnly(BasePermission):
 
 class IsAuthorOrReadOnly(BasePermission):
     """
-    Object-level permission to only allow owners of an object to edit it.
-    Assumes the model instance has an `author` attribute.
+    Object-level permission to only allow authors of an object to edit it. Assumes the model instance has an `author` attribute.
     """
 
     message = "Only the author of an object can modify or delete it."
