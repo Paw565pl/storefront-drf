@@ -3,7 +3,7 @@ from rest_framework.exceptions import NotFound
 from products.models import Product
 
 
-def get_product_or_404(product_identifier: int | str) -> Product | None:
+def get_product_or_404(product_identifier: int | str) -> Product:
     try:
         return Product.objects.get(pk=product_identifier)
     except (Product.DoesNotExist, ValueError):
