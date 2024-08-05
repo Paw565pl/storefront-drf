@@ -1,7 +1,6 @@
 from datetime import timedelta
-from os import environ
 
-from .common import *
+from .common import *  # noqa: F403
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-p84^d=98%mj4bvtgo7dn3d38djc*1cfm-!bb9=+@4@1m+xnbz0"
@@ -13,8 +12,8 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
-INSTALLED_APPS.append("debug_toolbar")
-MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
+MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
 
 INTERNAL_IPS = ["127.0.0.1"]
 
@@ -24,7 +23,7 @@ DATABASES = {
         "NAME": "storefront",
         "USER": "postgres",
         "PASSWORD": "mysecretpassword",
-        "HOST": environ.get("DB_HOST", "localhost"),
+        "HOST": "database",
         "PORT": "5432",
     }
 }
