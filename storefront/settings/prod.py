@@ -20,6 +20,11 @@ CELERY_RESULT_BACKEND = env.cache()
 
 CACHES = {"default": env.cache()}
 
+EMAIL_CONFIG = env.email(
+    "EMAIL_URL",
+)
+vars().update(EMAIL_CONFIG)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
