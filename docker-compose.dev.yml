@@ -9,6 +9,7 @@ services:
     depends_on:
       - database
       - redis
+      - maildev
     develop:
       watch:
         - action: sync
@@ -19,6 +20,63 @@ services:
         - action: rebuild
           path: pyproject.toml
 
+  pytest-watch:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: ptw
+    restart: always
+    depends_on:
+      - database
+      - redis
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app/
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: pyproject.toml
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: celery -A storefront worker -l INFO
+    restart: always
+    depends_on:
+      - redis
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: celery -A storefront beat -l INFO
+    restart: always
+    depends_on:
+      - redis
+      - celery-worker
+
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: celery -A storefront flower -l INFO
+    restart: always
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+      - celery-worker
+      - celery-beat
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "5000:1080"
+    restart: always
+  
   database:
     image: postgres:16-alpine
     ports:
@@ -32,6 +90,7 @@ services:
 
   redis:
     image: redis:7.2-alpine
+    command: redis-server --save 60 1 --loglevel warning
     ports:
       - "6379:6379"
     restart: always
