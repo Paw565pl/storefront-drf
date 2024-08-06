@@ -1,0 +1,2 @@
+Hello {{ username }}
+Your order nr. {{ order_id }} has been confirmed. Thank you for shopping with us.
