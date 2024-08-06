@@ -1,1 +1,3 @@
-from .celery import celery
+from storefront.celery import celery
+
+__all__ = ["celery"]
