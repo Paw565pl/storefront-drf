@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -150,3 +152,14 @@ SPECTACULAR_SETTINGS = {
 
 PHONENUMBER_DB_FORMAT = "INTERNATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "INTERNATIONAL"
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULE = {
+    "remove_unused_carts": {
+        "task": "orders.tasks.remove_unused_carts",
+        # every week
+        "schedule": crontab(
+            minute="0", hour="0", day_of_month="*", month_of_year="*", day_of_week="1"
+        ),
+    }
+}
