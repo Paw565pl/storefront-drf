@@ -61,6 +61,7 @@ class CartViewSet(
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+    ordering_fields = ["quantity", "total_price"]
 
     def get_queryset(self):
         cart_id = self.kwargs["cart_pk"]
@@ -88,6 +89,7 @@ class CartItemViewSet(ModelViewSet):
 
 class OrderViewSet(ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+    ordering_fields = ["status", "created_at", "updated_at", "total_price"]
 
     def get_queryset(self):
         queryset = (
