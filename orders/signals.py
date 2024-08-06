@@ -4,6 +4,7 @@ from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 
 from orders.models import Customer, CartItem, OrderItem, Order, Cart
+from orders.tasks import send_order_confirmation_email
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -65,3 +66,16 @@ def update_order_total_price(sender, instance: OrderItem, **kwargs):
             or 0
         )
         Order.objects.filter(id=order_id).update(total_price=new_total_price)
+
+
+@receiver(post_save, sender=Order)
+def send_email_to_customer_with_order_confirmation(
+    sender, instance: Order, created: bool, **kwargs
+):
+    if created:
+        order_id, username, user_email = (
+            instance.id,
+            instance.customer.user.username,
+            instance.customer.user.email,
+        )
+        send_order_confirmation_email.delay(order_id, username, user_email)
