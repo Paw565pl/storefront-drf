@@ -16,6 +16,7 @@ DATABASES = {
 }
 
 CELERY_BROKER_URL = env.cache()
+CELERY_RESULT_BACKEND = env.cache()
 
 CACHES = {"default": env.cache()}
 
