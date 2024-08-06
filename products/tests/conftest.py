@@ -23,4 +23,4 @@ def product_review(product) -> Review:
 @pytest.fixture(scope="session", autouse=True)
 def remove_mock_images():
     yield remove_mock_images
-    rmtree("media/products/images")
+    rmtree("media/test")
