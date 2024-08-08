@@ -2,7 +2,9 @@ import environ
 
 from .common import *  # noqa
 
-env = environ.Env(LOG_LEVEL=(str, "ERROR"))
+env = environ.Env(
+    CELERY_BROKER_URL=str, CELERY_RESULT_BACKEND_URL=str, LOG_LEVEL=(str, "ERROR")
+)
 environ.Env.read_env(BASE_DIR / ".env")  # noqa: F405
 
 SECRET_KEY = env("SECRET_KEY")
@@ -15,14 +17,12 @@ DATABASES = {
     "default": env.db(),
 }
 
-CELERY_BROKER_URL = env.cache()
-CELERY_RESULT_BACKEND = env.cache()
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND_URL")
 
 CACHES = {"default": env.cache()}
 
-EMAIL_CONFIG = env.email(
-    "EMAIL_URL",
-)
+EMAIL_CONFIG = env.email()
 vars().update(EMAIL_CONFIG)
 
 LOGGING = {
