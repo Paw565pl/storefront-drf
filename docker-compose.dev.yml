@@ -64,6 +64,10 @@ services:
       dockerfile: Dockerfile.dev
     command: celery -A storefront flower -l INFO
     restart: always
+    environment:
+      - DEBUG=1
+      - CELERY_BROKER=redis://redis:6379
+      - CELERY_BACKEND=redis://redis:6379
     ports:
       - "5555:5555"
     depends_on:
