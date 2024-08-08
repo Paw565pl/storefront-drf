@@ -1,41 +1,58 @@
 from random import randint
+from uuid import uuid4
+
 from locust import FastHttpUser, task, between
 
 
 class WebsiteUser(FastHttpUser):
-    wait_time = between(1, 10)
+    cart_id: uuid4
+    wait_time = between(1, 5)
 
     @task(5)
     def view_products(self):
         collection_id = randint(2, 10)
         self.client.get(
-            f"/store/products/?collection_id={collection_id}/", name="/store/products/"
+            f"/api/products/?collection_id={collection_id}/", name="/api/products/"
         )
 
     @task(4)
     def view_product(self):
-        product_id = randint(1, 1000)
-        self.client.get(f"/store/products/{product_id}/", name="/store/products/:id/")
+        product_id = randint(1, 800)
+        self.client.get(f"/api/products/{product_id}/", name="/api/products/:id/")
+
+    @task(3)
+    def view_product_reviews(self):
+        product_id = randint(1, 800)
+        self.client.get(
+            f"/api/products/{product_id}/reviews/", name="/api/products/:id/reviews/"
+        )
 
     @task(2)
-    def add_to_cart(self):
+    def view_collections(self):
+        self.client.get("/api/collections/", name="/api/collections/")
+
+    @task(1)
+    def view_collection(self):
+        collection_id = randint(2, 10)
+        self.client.get(
+            f"/api/collections/{collection_id}/", name="/api/collections/:id/"
+        )
+
+    @task(1)
+    def view_cart(self):
+        self.client.get(f"/api/carts/{self.cart_id}/", name="/api/carts/:id/")
+
+    @task(3)
+    def add_product_to_cart(self):
         product_id = randint(1, 100)
 
         self.client.post(
-            f"/store/carts/{self.cart_id}/items/",
-            name="store/carts/:cart_id/items/",
-            json={"product_id": product_id, "quantity": product_id // randint(1, 5)},
+            f"/api/carts/{self.cart_id}/items/",
+            name="api/carts/:cart_id/items/",
+            json={"product_id": product_id, "quantity": 1},
         )
 
-    @task(3)
-    def main_endpoint(self):
-        self.client.get("", name="/")
-
-    @task(1)
-    def slow_endpoint(self):
-        self.client.get("/playground/slow/", name="/playground/slow/")
-
     def on_start(self):
-        response = self.client.post("/store/carts/")
+        response = self.client.post("/api/carts/")
         result = response.json()
         self.cart_id = result["id"]
