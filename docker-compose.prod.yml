@@ -1,13 +1,21 @@
 services:
-  # nginx
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:80"
+    depends_on:
+      - backend
+    volumes:
+      - django-static:/usr/share/nginx/html/static:ro
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile.prod
     restart: always
-    ports:
-      - "8000:8000"
     depends_on:
       - database
       - redis
@@ -19,9 +27,8 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379
       - CELERY_RESULT_BACKEND_URL=redis://redis:6379
       - EMAIL_URL=smtp://maildev:1080
-      - LOG_LEVEL=DEBUG
     volumes:
-      - django-logs:/app/general.log
+      - django-static:/app/static
 
   celery-worker:
     build:
@@ -77,6 +84,6 @@ services:
       - redis-data:/data
 
 volumes:
-  django-logs:
+  django-static:
   db-data:
   redis-data:
