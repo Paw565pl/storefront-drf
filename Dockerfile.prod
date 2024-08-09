@@ -19,8 +19,10 @@ RUN poetry install --without dev --compile --no-root
 
 COPY . .
 
+RUN DJANGO_SETTINGS_MODULE=storefront.settings.common python manage.py collectstatic --no-input
+
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
 
 USER appuser
 
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --no-input && gunicorn -b 0.0.0.0:8000 storefront.wsgi"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn -b 0.0.0.0:8000 --workers 8 storefront.wsgi"]
