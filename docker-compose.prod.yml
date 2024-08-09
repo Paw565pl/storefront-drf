@@ -58,14 +58,10 @@ services:
 
   maildev:
     image: maildev/maildev
-    ports:
-      - "5000:1080"
     restart: always
 
   database:
     image: postgres:16-alpine
-    ports:
-      - "5432:5432"
     restart: always
     environment:
       POSTGRES_DB: storefront
@@ -76,8 +72,6 @@ services:
   redis:
     image: redis:7.2-alpine
     command: redis-server --save 60 1
-    ports:
-      - "6379:6379"
     restart: always
     volumes:
       - redis-data:/data
