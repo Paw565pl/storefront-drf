@@ -27,7 +27,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    command: celery -A storefront worker -l INFO
+    command: celery -A storefront worker
     restart: always
     depends_on:
       - redis
@@ -43,7 +43,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    command: celery -A storefront beat -l INFO
+    command: celery -A storefront beat
     restart: always
     depends_on:
       - redis
