@@ -29,6 +29,7 @@ services:
       - EMAIL_URL=smtp://maildev:1080
     volumes:
       - django-static:/app/static
+      - django-media:/app/media
 
   celery-worker:
     build:
@@ -85,5 +86,6 @@ services:
 
 volumes:
   django-static:
+  django-media:
   db-data:
   redis-data:
